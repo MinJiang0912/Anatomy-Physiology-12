@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A&amp;P 12 Unit 1 — Drill-down map</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F5F2;--ink:#17202A;--mute:#5B6570;--line:#D3D9D5;--violet:#5B3E96;--violet-soft:#ECE6F7;--navy:#1C2B4A;--red:#B8322A;--amber:#FFF7E8;--amber-line:#E5C98F;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#141A22;--ink:#EEF1F4;--mute:#9AA5B1;--line:#2C3743;--violet:#B39DDB;--violet-soft:#2B2340;--navy:#C9D4E5;--amber:#3A3020;--amber-line:#7A6533}}
+*{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;font-size:17px;line-height:1.45}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+button:focus-visible{outline:3px solid var(--violet);outline-offset:2px}
+.app{display:grid;grid-template-columns:300px 1fr;min-height:100%}
+.tree{border-right:1.5px solid var(--line);padding:16px 10px;overflow:auto;position:sticky;top:0;height:100vh}
+.tree h2{font-size:.95rem;margin:0 10px 10px;color:var(--mute);font-weight:400}
+.tree ul{list-style:none;margin:0;padding-left:14px}
+.tree>ul{padding-left:0}
+.tree li>button{display:block;width:100%;padding:4px 8px;border-radius:7px;font-size:.92rem}
+.tree li>button:hover{background:var(--violet-soft)}
+.tree li>button.on{background:var(--violet);color:#fff}
+.tree li>button .n{color:var(--mute);font-size:.8rem;margin-left:4px}
+.tree li>button.on .n{color:#E4DCF5}
+.main{padding:22px 26px 60px;max-width:820px}
+.crumbs{display:flex;flex-wrap:wrap;gap:4px;font-size:.88rem;color:var(--mute);margin-bottom:12px}
+.crumbs button{padding:2px 6px;border-radius:6px;text-decoration:underline;color:var(--mute)}
+.crumbs button:hover{background:var(--violet-soft);color:var(--ink)}
+.crumbs span::after{content:"›";margin:0 4px}
+h1{font-size:1.7rem;margin:0 0 4px;color:var(--navy);line-height:1.2}
+.line{color:var(--violet);font-weight:700;margin:0 0 16px}
+.body p{margin:0 0 10px;max-width:68ch}
+.body b{color:var(--violet)}
+.fig{max-width:68ch;margin:6px 0 16px;border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:8px;overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;font-family:inherit}
+.fig figcaption{font-size:.85rem;color:#5B6570;padding:6px 4px 0}
+.draw{background:var(--amber);border:1.5px solid var(--amber-line);border-radius:10px;padding:10px 12px;margin:10px 0;max-width:68ch}
+.kids{display:grid;gap:10px;margin-top:20px}
+.kid{border:2px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.kid:hover{border-color:var(--violet);background:var(--violet-soft)}
+.kid b{display:block;color:var(--navy)}
+.kid span{color:var(--mute);font-size:.92rem}
+.kid i{font-style:normal;color:var(--violet);font-weight:700;flex:none}
+.h3{font-size:.85rem;color:var(--mute);margin:22px 0 6px}
+.links{display:flex;flex-wrap:wrap;gap:8px}
+.links button{border:1.5px solid var(--violet);color:var(--violet);border-radius:999px;padding:5px 12px;font-size:.88rem}
+.links button:hover{background:var(--violet-soft)}
+.up{margin-top:24px;color:var(--mute);text-decoration:underline}
+.menu{display:none}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr}
+  .tree{position:fixed;inset:0;height:auto;z-index:5;background:var(--paper);display:none;padding-top:calc(16px + env(safe-area-inset-top,0px))}
+  .tree.open{display:block}
+  .menu{display:inline-block;margin-bottom:12px;border:1.5px solid var(--line);border-radius:8px;padding:6px 12px;font-weight:700}
+  .tree .close{display:block;margin:0 10px 12px;font-weight:700;color:var(--violet)}
+  .main{padding:16px 16px 60px}
+}
+.tree .close{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="tree" id="tree"><button class="close" id="close">Close map</button><h2>Whole unit — tap anything</h2><div id="treebox"></div></nav>
+  <main class="main">
+    <button class="menu" id="menu">Show whole map</button>
+    <div class="crumbs" id="crumbs"></div>
+    <h1 id="title"></h1>
+    <p class="line" id="line"></p>
+    <div class="body" id="body"></div>
+    <div id="kids"></div>
+    <div id="links"></div>
+    <button class="up" id="up"></button>
+  </main>
+</div>
+
+<script>
+// Each node: id, t (title), l (one line), b (body html), k (children), x (cross-links by id)
+const N = {
+id:'root', t:'Anatomy & Physiology 12 — Unit 1', l:'One question runs the whole unit: what is the body made of, and why does it guard the conditions those molecules need?',
+b:`<p>Start with any molecule family. Each one unfolds the same way: <b>what it does → the shape that lets it do that → the levels of that shape → the single brick it is built from → the parts of the brick → the test that proves a sample is that molecule → the experiment that runs the test.</b> Follow one family all the way down and you have walked every topic on the test sheet.</p>`,
+k:[
+ {id:'protein', t:'Proteins', l:'The worker molecules. Shape is everything.',
+  b:`<p>About half the dry weight of a cell. Everything a cell <i>does</i> — catalyse, move, carry, signal, defend — is done by a protein, and each job is possible only because that protein has a specific shape.</p>`,
+  k:[
+   {id:'p-fn', t:'Function', l:'Seven jobs, one rule: the job comes from the shape.',
+    b:`<p><b>Enzymes</b> (speed reactions: amylase, pepsin) · <b>structure</b> (collagen, keratin) · <b>transport</b> (hemoglobin carries O₂) · <b>antibodies</b> (immune) · <b>hormones</b> (insulin) · <b>membrane channels and receptors</b> · <b>muscle</b> (actin, myosin).</p>
+    <p>Exam phrasing: "a function of some proteins is to speed up chemical reactions." A protein does its job because its 3D shape fits something — a substrate, a signal, another protein. Change the shape and the job stops. That is why structure comes next.</p>`,
+    x:['p-tert','homeo']},
+   {id:'p-struct', t:'Structure — four levels', l:'Read them from the finished protein down to the raw chain.',
+    b:`<p>A protein is built up in four levels. The exam asks each level two ways: "which level is X?" and "what holds it together?"</p>`,
+    k:[
+     {id:'p-quat', t:'Quaternary', l:'Two or more chains working as one unit.',
+      b:`<p>Some proteins are several polypeptides bundled together. <b>Hemoglobin = four chains.</b> Held by the same R-group interactions as tertiary. Not every protein has this level.</p>`},
+     {id:'p-tert', t:'Tertiary', l:'The overall 3D fold of one chain. This makes the active site.',
+      b:`<p>The whole chain bends and folds into a globular shape, held by bonds <b>between R groups</b>: hydrogen bonds, ionic bonds, <b>disulfide bridges</b>, hydrophobic interactions (non-polar R groups hide from water inside).</p>
+      <p>The fold creates the <b>active site</b> — the pocket an enzyme's substrate fits into. Exam wording: "the tertiary structure of an enzyme is its three-dimensional, globular shape."</p>
+      <p><b>Denaturation</b> = losing this fold. Causes: heat, pH change, heavy metals. The sequence is untouched but the shape and the function are gone. Egg white going solid, curdled milk, permed hair. This is the direct reason the body guards pH and temperature.</p>`,
+      x:['ph','homeo','water-hbond']},
+     {id:'p-sec', t:'Secondary', l:'Local coiling: alpha helix or beta pleated sheet.',
+      b:`<p>Parts of the chain coil into an <b>alpha helix</b> or fold into a <b>beta pleated sheet</b>. Held by <b>hydrogen bonds</b> between the backbone's C=O and N–H groups (not the R groups). Exam trap: "the alpha-helix shape is the <b>secondary</b> structure."</p>`,
+      x:['water-hbond']},
+     {id:'p-prim', t:'Primary', l:'The sequence of amino acids, joined by peptide bonds.',
+      b:`<p>The linear order of amino acids in the chain. Held by <b>peptide bonds</b>. The order is set by the gene (DNA → mRNA → ribosome) and decides how every higher level folds — one wrong amino acid can change the whole shape (sickle-cell hemoglobin).</p>`,
+      k:[
+       {id:'p-pep', t:'Peptide bond', l:'COOH of one amino acid + NH₂ of the next, water removed.',
+        b:`<p>A <b>dehydration synthesis</b>: the –OH from one carboxyl and an –H from the next amino group leave as H₂O, and a C–N covalent bond forms. Two amino acids = dipeptide, many = polypeptide. Digestion reverses it by <b>hydrolysis</b> (pepsin, trypsin, peptidases).</p>
+        <div class="draw"><b>Draw it:</b> two amino acids side by side, circle the OH and H that leave, draw the C–N bond, write "+ H₂O".</div>`,
+        x:['build','nucleic']}
+      ],
+      x:['nucleic']}
+    ]},
+   {id:'p-mono', t:'Monomer — the amino acid', l:'One brick, four things stuck to a central carbon.',
+    b:`<p>Every protein is a chain of amino acids. There are <b>20 kinds</b>, and they all share the same core; only one part differs.</p>
+    <div class="draw"><b>Draw it (on the test):</b> a central C. Above it H. Left: NH₂. Right: COOH. Below: R.</div>`,
+    k:[
+     {id:'aa-amino', t:'Amino group –NH₂', l:'The nitrogen end. Acts as a base.',
+      b:`<p>Nitrogen with two hydrogens. It can accept an H⁺, so it behaves as a base. It is the reason protein contains <b>nitrogen</b> while carbohydrates and lipids do not — exam question: "if new proteins are radioactive, the element used was nitrogen." It forms the peptide bond with the next amino acid's carboxyl.</p>`,
+      x:['ph']},
+     {id:'aa-carboxyl', t:'Carboxyl group –COOH', l:'The acid end. Releases H⁺.',
+      b:`<p>Carbon double-bonded to one oxygen and single-bonded to an –OH. It can give up its H⁺, so it is an acid (the "acid" in amino acid). Its –OH is what leaves during peptide-bond formation.</p>`,
+      x:['ph','p-pep']},
+     {id:'aa-r', t:'R group', l:'The variable part. 20 versions make 20 amino acids.',
+      b:`<p>Everything else on the central carbon is the same; the R group is what makes glycine different from cysteine. R groups can be <b>polar, non-polar, acidic or basic</b>, and those properties drive folding: non-polar R groups hide inside, polar ones face water, two cysteines can make a disulfide bridge. So the R groups decide the tertiary structure.</p>`,
+      x:['p-tert']},
+     {id:'aa-central', t:'Central carbon + H', l:'The alpha carbon holding the four groups.',
+      b:`<p>Carbon makes four bonds — that is the only reason this arrangement is possible. One bond to H, one to NH₂, one to COOH, one to R.</p>`,
+      x:['atoms']}
+    ]},
+   {id:'p-test', t:'Test for it — Biuret', l:'Blue → purple means protein is present.',
+    b:`<p>Biuret reagent (copper sulfate in a base) reacts with the <b>peptide bonds</b> — so it detects a protein chain, not a single amino acid. Blue stays blue with no protein; turns violet/purple with protein. The more peptide bonds, the deeper the purple.</p>
+    <p>To confirm a sample is protein you run this as a proper experiment, which is the next level down.</p>`,
+    k:[
+     {id:'exp', t:'The experiment', l:'Turn "does it contain protein?" into a controlled test.',
+      b:`<p><b>Hypothesis:</b> "IF the unknown contains protein, THEN Biuret reagent will turn purple."</p>
+      <p><b>Independent variable:</b> which solution is tested. <b>Dependent variable:</b> the colour. <b>Controlled:</b> same volume of reagent, same time, same temperature.</p>
+      <p><b>Positive control:</b> egg white (known protein) — must go purple or the reagent is bad. <b>Negative control:</b> distilled water — must stay blue or something is contaminated.</p>
+      <p>Repeat 3 times. Record in a table (sample / reagent / colour before / colour after). Conclude: did the data support the hypothesis? List sources of error (reagent age, timing, judging colour).</p>`,
+      k:[
+       {id:'method', t:'The scientific method', l:'The pattern behind every experiment in the course.',
+        b:`<p><b>Observation → hypothesis → experiment → conclusion → theory.</b> A theory is an explanation supported by many experiments; a hypothesis is a testable proposed explanation.</p>
+        <p><b>Control</b> = the group treated exactly the same except for the one factor being tested. Exam example: half the group uses the new toothpaste, half uses their regular toothpaste.</p>
+        <p>The same skeleton runs the homeostasis experiments (heart rate vs room temperature, sweating vs exercise) — receptor/effector questions are just this method applied to the body.</p>`,
+        x:['homeo']}
+      ]}
+    ]}
+  ],
+  x:['carb','lipid','nucleic']},
+
+ {id:'carb', t:'Carbohydrates', l:'Fast energy and structure, all built from sugar rings.',
+  b:`<p>Formula (CH₂O)ₙ — hydrogen to oxygen always 2:1. Unfold the same way: job → forms → brick → parts → test.</p>`,
+  k:[
+   {id:'c-fn', t:'Function', l:'Quick energy, short-term storage, structure.',
+    b:`<p>Glucose is the cell's main fuel (broken down to make ATP). Starch and glycogen park glucose for later. Cellulose builds plant cell walls. Ribose and deoxyribose form the backbone of RNA and DNA.</p>`, x:['nucleic']},
+   {id:'c-forms', t:'Forms — mono, di, poly', l:'One ring, two rings, hundreds of rings.',
+    b:`<p><b>Monosaccharides:</b> glucose, fructose, galactose — all C₆H₁₂O₆, different arrangements. Ribose/deoxyribose are 5-carbon.</p>
+    <p><b>Disaccharides</b> (one dehydration synthesis): maltose = glucose + glucose; sucrose = glucose + fructose; lactose = glucose + galactose.</p>
+    <p><b>Polysaccharides</b> (all glucose): <b>starch</b> plant storage · <b>glycogen</b> animal storage (liver, muscle) · <b>cellulose</b> plant cell wall. Cellulose uses a different linkage between glucoses, so human enzymes can't hydrolyse it — it's fibre. Exam: "hydrolysis of a polysaccharide gives the most glucose."</p>`, x:['build']},
+   {id:'c-mono', t:'Monomer — glucose', l:'A six-carbon ring.',
+    b:`<p>C₆H₁₂O₆. Six carbons; five of them plus one oxygen form the ring, carbon 6 hangs off as CH₂OH. Hydroxyl (–OH) groups on the ring carbons make it polar, so it dissolves in water.</p>
+    <div class="draw"><b>Draw it:</b> a hexagon with an O at the top-right corner, CH₂OH sticking up from the top-left carbon, OH or H on the others.</div>`, x:['water']},
+   {id:'c-test', t:'Test for it — iodine and Benedict\'s', l:'Iodine: blue-black = starch. Benedict\'s: brick red = simple sugar.',
+    b:`<p><b>Iodine</b> (Lugol's) slips inside the starch coil and turns brown → blue-black. It does not react with glucose.</p>
+    <p><b>Benedict's</b>, heated, reacts with reducing sugars (glucose, maltose): blue → green → yellow → orange → brick red as the amount rises. Sucrose does not react.</p>
+    <p>Run it as the same controlled experiment as Biuret: positive control = starch solution or glucose solution; negative = water.</p>`, x:['exp']}
+  ], x:['protein','lipid']},
+
+ {id:'lipid', t:'Lipids', l:'Long-term energy and membranes; the non-polar family.',
+  b:`<p>Not a true polymer, but built by the same reaction. Job → forms → bricks → test.</p>`,
+  k:[
+   {id:'l-fn', t:'Function', l:'Store energy, insulate, protect, build membranes, make hormones.',
+    b:`<p>More energy per gram than carbohydrate; insulates; cushions organs; phospholipids form every cell membrane; steroids act as hormones. Non-polar, so they don't dissolve in water — which is exactly why they can build membranes.</p>`, x:['water-phobic']},
+   {id:'l-forms', t:'Forms — fat, oil, phospholipid, steroid', l:'Same glycerol backbone, different attachments.',
+    b:`<p><b>Triglyceride</b> = glycerol + 3 fatty acids (three dehydration syntheses, 3 H₂O out). Fat if saturated, oil if unsaturated.</p>
+    <p><b>Phospholipid</b> = glycerol + 2 fatty acids + phosphate. Polar (hydrophilic) head, non-polar (hydrophobic) tails → lines up as a bilayer in water = cell membrane.</p>
+    <p><b>Steroid</b> = four fused carbon rings: cholesterol, testosterone, estrogen. Exam: "steroid molecules can act as hormones."</p>`, x:['build']},
+   {id:'l-mono', t:'Bricks — glycerol and fatty acids', l:'A 3-carbon alcohol and long hydrocarbon chains.',
+    b:`<p><b>Glycerol:</b> three carbons, each with an –OH.</p>
+    <p><b>Fatty acid:</b> a carboxyl (–COOH) head and a long hydrocarbon tail.</p>`,
+    k:[
+     {id:'l-sat', t:'Saturated', l:'No C=C double bonds; straight; solid; animal fat.',
+      b:`<p>Every carbon carries the maximum hydrogen ("saturated with H"). Straight chains pack tightly → solid at room temperature. Butter, lard.</p>`},
+     {id:'l-unsat', t:'Unsaturated', l:'One or more C=C; kinked; liquid; plant oil.',
+      b:`<p>Each double bond removes two hydrogens and puts a kink in the chain, so the chains can't pack → liquid. Olive oil. Add hydrogen (hydrogenation) and an oil becomes a fat — exam: "an unsaturated fat could become saturated if hydrogen atoms were added."</p>
+      <div class="draw"><b>Draw it:</b> COOH on the left, a zigzag of C's each with two H's; for unsaturated, one C=C with a bend in the chain there.</div>`}
+    ]},
+   {id:'l-test', t:'Test for it — Sudan IV', l:'Red stain in the fat layer = lipid.',
+    b:`<p>Sudan IV is a red dye that dissolves in lipid but not water. Shake the sample: if lipid is present the dye collects as a red layer or red droplets. Positive control = vegetable oil; negative = water. Same experimental frame as Biuret.</p>`, x:['exp']}
+  ], x:['protein','water']},
+
+ {id:'nucleic', t:'Nucleic acids and ATP', l:'The instructions, and the energy currency.',
+  b:`<p>DNA holds the sequence that becomes every protein's primary structure; ATP pays for every dehydration synthesis. Job → forms → brick → parts.</p>`,
+  k:[
+   {id:'n-fn', t:'Function', l:'DNA stores the code; RNA carries it; ATP carries energy.',
+    b:`<p>DNA sequence → transcribed to mRNA → translated at the ribosome into an amino acid sequence (primary structure). So DNA is upstream of every protein shape.</p>`, x:['p-prim']},
+   {id:'n-forms', t:'DNA vs RNA', l:'Sugar, bases and strands differ.',
+    b:`<p><b>DNA:</b> deoxyribose · A T G C · double helix · strands held by <b>hydrogen bonds</b>: A pairs T (2 bonds), G pairs C (3). So the number of A equals the number of T.</p>
+    <p><b>RNA:</b> ribose · A <b>U</b> G C · single strand. Exam trap: uracil is in RNA only.</p>`, x:['water-hbond']},
+   {id:'n-mono', t:'Monomer — the nucleotide', l:'Phosphate + 5-carbon sugar + nitrogenous base.',
+    b:`<p>Nucleotides join by dehydration synthesis into a sugar-phosphate backbone with the bases sticking off.</p>
+    <div class="draw"><b>Draw it:</b> circle (phosphate) – pentagon (sugar) – rectangle (base). Label the sugar deoxyribose or ribose.</div>`, x:['build']},
+   {id:'atp', t:'ATP', l:'A nucleotide with three phosphates; energy is in the phosphate bonds.',
+    b:`<p>Adenine + ribose + three phosphates. Breaking the last phosphate off (ATP → ADP + P) releases energy for active transport, muscle contraction and building polymers. Energy from breaking down glucose is stored as ATP. ATP is a nucleotide, not a protein or a sugar.</p>`, x:['build','carb']}
+  ], x:['protein']},
+
+ {id:'build', t:'How everything is built', l:'One reaction joins monomers; its reverse breaks them.',
+  b:`<p><b>Dehydration synthesis:</b> remove H₂O, join two monomers. Water is a product every time. Builds starch from glucose, protein from amino acids, fat from glycerol + fatty acids, DNA from nucleotides.</p>
+  <p><b>Hydrolysis:</b> add H₂O, break the bond, release monomers. This is digestion: amylase, pepsin, lipase are hydrolytic enzymes.</p>
+  <p>Carbon makes this possible — four covalent bonds let it form chains, rings and branches.</p>`, x:['atoms','p-pep','atp']},
+
+ {id:'water', t:'Water, pH and bonding', l:'The rules every molecule above has to obey.',
+  b:`<p>Why molecules dissolve or hide, why hydrogen bonds hold DNA and protein folds, and why pH can wreck a shape.</p>`,
+  k:[
+   {id:'atoms', t:'Atoms and bonds', l:'Covalent shares, ionic transfers, hydrogen attracts.',
+    b:`<p>Atomic number = protons; mass number = protons + neutrons; <b>isotopes</b> differ in neutrons (C-12, C-13, C-14 — radioactive ones trace molecules through the body).</p>
+    <p><b>Covalent:</b> share electrons; strong; holds water and every organic molecule together. <b>Ionic:</b> transfer electrons, ions attract; NaCl. <b>Hydrogen bond:</b> weak pull between a slightly + H and a slightly – O or N.</p>
+    <p><b>Organic</b> = carbon + hydrogen (the four families). <b>Inorganic</b> = usually no carbon (water, salts).</p>`},
+   {id:'water-polar', t:'Water is polar', l:'Unequal electron sharing gives O a – end and H a + end.',
+    b:`<p>Oxygen pulls the shared electrons harder than hydrogen. Result: partial charges → water molecules attract each other → hydrogen bonds → all of water's properties.</p>`,
+    k:[
+     {id:'water-hbond', t:'Hydrogen bonds and what they do', l:'Weak alone, strong in numbers.',
+      b:`<p>Between water molecules: <b>solvent</b> (dissolves polar and ionic things, so reactions can happen), <b>high heat capacity</b> (temperature regulator — the Jan 2010 written-response question), <b>high heat of vaporization</b> (sweating cools), cohesion, surface tension, ice floats.</p>
+      <p>Inside molecules: hold the two DNA strands together (A–T, G–C), hold a protein's secondary structure, and help hold its tertiary fold.</p>`, x:['p-sec','n-forms']},
+     {id:'water-phobic', t:'Hydrophilic vs hydrophobic', l:'Polar dissolves; non-polar hides.',
+      b:`<p><b>Hydrophilic</b> = polar or charged (sugars, salts, amino groups): dissolves in water. <b>Hydrophobic</b> = non-polar (fatty acid tails, non-polar R groups): pushed together away from water. That push is what folds proteins and lines up membranes.</p>`, x:['l-forms','p-tert']}
+    ]},
+   {id:'ph', t:'Acids, bases, pH, buffers', l:'pH counts H⁺; buffers keep it steady so proteins keep their shape.',
+    b:`<p><b>Acid</b> releases H⁺ and lowers pH. <b>Base</b> releases OH⁻ (or takes up H⁺) and raises pH. Scale 0–14, 7 neutral, each step ×10. pH 2 → 5 means the solution lost H⁺.</p>
+    <p><b>Blood 7.4 · stomach 2 · small intestine 8.5.</b></p>
+    <p><b>Buffer:</b> takes up excess H⁺ or OH⁻ so pH barely moves. Blood: CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻.</p>
+    <p>Why it matters: H⁺ changes the charge on amino and carboxyl groups and on R groups, which changes the bonds holding the tertiary fold → denaturation. Pepsin works at pH 2, trypsin at pH 8; swap them and both stop.</p>`, x:['p-tert','aa-amino','aa-carboxyl','homeo']}
+  ]},
+
+ {id:'homeo', t:'Homeostasis', l:'Why the body guards temperature, pH and glucose: to protect molecular shapes.',
+  b:`<p><b>Homeostasis</b> = keeping the internal environment constant. <b>Receptor</b> detects a change → <b>control centre</b> (brain, spinal cord) decides → <b>effector</b> (muscle or gland) responds. All three are made of proteins.</p>
+  <p><b>Negative feedback</b> reverses the change and restores the set point: thermostat, sweating and shivering, thyroxin↑ → TSH↓, insulin lowering glucose. Most of the body runs this way.</p>
+  <p><b>Positive feedback</b> amplifies the change until an end point: oxytocin in labour, blood clotting. Exam: "positive feedback disrupts homeostasis."</p>
+  <p>Characteristics of life: organized · metabolism · reproduce · respond to stimuli · homeostasis · grow and develop · adapt.</p>
+  <p>Experiments on it use the same method as the Biuret test: IF room temperature rises THEN heart rate rises; independent = temperature, dependent = heart rate, 3 trials, controls.</p>`, x:['p-tert','ph','method']}
+]};
+
+// ---------- diagrams (inline SVG, drawn to match what the test asks the kid to draw) ----------
+const S = 'xmlns="http://www.w3.org/2000/svg" font-size="15" fill="#17202A"';
+const L = 'stroke="#17202A" stroke-width="2"';
+const V = 'fill="#5B3E96"';
+const D = {
+'p-mono': [`<svg viewBox="0 0 420 220" ${S}>
+ <line x1="210" y1="110" x2="210" y2="50" ${L}/><line x1="210" y1="110" x2="210" y2="170" ${L}/>
+ <line x1="210" y1="110" x2="130" y2="110" ${L}/><line x1="210" y1="110" x2="290" y2="110" ${L}/>
+ <circle cx="210" cy="110" r="18" fill="#fff" ${L}/><text x="210" y="116" text-anchor="middle" font-weight="700">C</text>
+ <text x="210" y="42" text-anchor="middle" font-weight="700">H</text>
+ <rect x="52" y="90" width="78" height="40" rx="8" fill="#ECE6F7" stroke="#5B3E96"/><text x="91" y="115" text-anchor="middle" font-weight="700">H₂N</text>
+ <rect x="290" y="90" width="90" height="40" rx="8" fill="#FDECEA" stroke="#B8322A"/><text x="335" y="115" text-anchor="middle" font-weight="700">COOH</text>
+ <rect x="188" y="170" width="44" height="36" rx="8" fill="#E6F2EC" stroke="#2F7A5A"/><text x="210" y="194" text-anchor="middle" font-weight="700">R</text>
+ <text x="91" y="80" text-anchor="middle" font-size="12" ${V}>amino group (base)</text>
+ <text x="335" y="80" text-anchor="middle" font-size="12" fill="#B8322A">carboxyl group (acid)</text>
+ <text x="300" y="196" font-size="12" fill="#2F7A5A">the part that varies — 20 kinds</text>
+</svg>`,'The amino acid the test asks you to draw: central carbon with H, NH₂, COOH and R.'],
+
+'p-pep': [`<svg viewBox="0 0 560 200" ${S}>
+ <g><rect x="20" y="70" width="60" height="36" rx="7" fill="#ECE6F7" stroke="#5B3E96"/><text x="50" y="94" text-anchor="middle">H₂N</text>
+ <circle cx="115" cy="88" r="14" fill="#fff" ${L}/><text x="115" y="93" text-anchor="middle">C</text>
+ <text x="115" y="62" text-anchor="middle" font-size="12">R₁</text><line x1="80" y1="88" x2="101" y2="88" ${L}/><line x1="129" y1="88" x2="150" y2="88" ${L}/>
+ <rect x="150" y="70" width="52" height="36" rx="7" fill="#FDECEA" stroke="#B8322A"/><text x="176" y="94" text-anchor="middle">C=O</text>
+ <rect x="202" y="70" width="34" height="36" rx="7" fill="#FDECEA" stroke="#B8322A" stroke-dasharray="4 3"/><text x="219" y="94" text-anchor="middle">OH</text></g>
+ <g><rect x="262" y="70" width="30" height="36" rx="7" fill="#ECE6F7" stroke="#5B3E96" stroke-dasharray="4 3"/><text x="277" y="94" text-anchor="middle">H</text>
+ <rect x="292" y="70" width="44" height="36" rx="7" fill="#ECE6F7" stroke="#5B3E96"/><text x="314" y="94" text-anchor="middle">N</text>
+ <circle cx="371" cy="88" r="14" fill="#fff" ${L}/><text x="371" y="93" text-anchor="middle">C</text><text x="371" y="62" text-anchor="middle" font-size="12">R₂</text>
+ <line x1="336" y1="88" x2="357" y2="88" ${L}/><line x1="385" y1="88" x2="406" y2="88" ${L}/>
+ <rect x="406" y="70" width="70" height="36" rx="7" fill="#FDECEA" stroke="#B8322A"/><text x="441" y="94" text-anchor="middle">COOH</text></g>
+ <path d="M219 112 Q 248 150 277 112" fill="none" stroke="#B8322A" stroke-width="2" stroke-dasharray="4 3"/>
+ <text x="248" y="168" text-anchor="middle" fill="#B8322A" font-weight="700">OH + H leave as H₂O</text>
+ <text x="248" y="40" text-anchor="middle" ${V} font-weight="700">C–N = peptide bond forms here</text>
+</svg>`,'Dehydration synthesis: the carboxyl of one amino acid and the amino group of the next lose a water and bond C–N.'],
+
+'p-struct': [`<svg viewBox="0 0 760 190" ${S}>
+ <g><text x="90" y="24" text-anchor="middle" font-weight="700">Primary</text>
+  <line x1="40" y1="80" x2="140" y2="80" ${L}/>
+  ${[0,1,2,3,4,5].map(i=>`<circle cx="${40+i*20}" cy="80" r="9" fill="${['#5B3E96','#2F7A5A','#B8322A','#A8631A','#5B3E96','#2F7A5A'][i]}"/>`).join('')}
+  <text x="90" y="130" text-anchor="middle" font-size="12">sequence</text><text x="90" y="146" text-anchor="middle" font-size="12">peptide bonds</text></g>
+ <g><text x="275" y="24" text-anchor="middle" font-weight="700">Secondary</text>
+  <path d="M215 60 q 12 -18 25 0 t 25 0 t 25 0 t 25 0" fill="none" stroke="#5B3E96" stroke-width="3"/>
+  <path d="M215 100 l 24 0 M239 100 l -6 -6 M239 100 l -6 6 M250 110 l 24 0 M274 110 l -6 -6 M274 110 l -6 6 M285 100 l 24 0 M309 100 l -6 -6 M309 100 l -6 6" fill="none" stroke="#5B3E96" stroke-width="2"/>
+  <text x="275" y="130" text-anchor="middle" font-size="12">α-helix / β-sheet</text><text x="275" y="146" text-anchor="middle" font-size="12">H bonds</text></g>
+ <g><text x="460" y="24" text-anchor="middle" font-weight="700">Tertiary</text>
+  <path d="M420 100 c -10 -50 40 -70 60 -40 s -10 50 20 55 s 40 -30 20 -60" fill="none" stroke="#5B3E96" stroke-width="3"/>
+  <circle cx="470" cy="80" r="10" fill="none" stroke="#B8322A" stroke-width="2" stroke-dasharray="3 2"/><text x="470" y="60" text-anchor="middle" font-size="11" fill="#B8322A">active site</text>
+  <text x="460" y="130" text-anchor="middle" font-size="12">3D fold of one chain</text><text x="460" y="146" text-anchor="middle" font-size="12">R-group bonds</text></g>
+ <g><text x="650" y="24" text-anchor="middle" font-weight="700">Quaternary</text>
+  ${[[625,65],[675,65],[625,105],[675,105]].map(([x,y])=>`<path d="M${x-16} ${y} c 4 -22 28 -22 32 0 s -28 22 -32 0" fill="#ECE6F7" stroke="#5B3E96" stroke-width="2"/>`).join('')}
+  <text x="650" y="150" text-anchor="middle" font-size="12">several chains</text><text x="650" y="166" text-anchor="middle" font-size="12">hemoglobin ×4</text></g>
+</svg>`,'Four levels: sequence → local coils → whole fold (with the active site) → several chains together.'],
+
+'p-tert': [`<svg viewBox="0 0 520 170" ${S}>
+ <path d="M40 90 c 10 -60 80 -60 80 -10 s -60 50 -20 70 s 80 -30 50 -70" fill="none" stroke="#5B3E96" stroke-width="3"/>
+ <path d="M60 95 l 40 -22" stroke="#A8631A" stroke-width="2"/><text x="20" y="120" font-size="11" fill="#A8631A">S–S disulfide</text>
+ <path d="M95 60 l 20 26" stroke="#2F7A5A" stroke-width="2" stroke-dasharray="3 2"/><text x="118" y="60" font-size="11" fill="#2F7A5A">H bond</text>
+ <text x="90" y="160" text-anchor="middle" font-weight="700">folded = works</text>
+ <text x="260" y="85" text-anchor="middle" font-size="26" fill="#B8322A">→</text><text x="260" y="112" text-anchor="middle" font-size="12" fill="#B8322A">heat / wrong pH</text>
+ <path d="M340 40 c 20 30 -10 40 20 60 s -10 40 30 50 c 30 -10 20 -50 40 -60 s 20 -40 40 -50" fill="none" stroke="#5B3E96" stroke-width="3" stroke-dasharray="6 5"/>
+ <text x="420" y="160" text-anchor="middle" font-weight="700">denatured = same sequence, no shape</text>
+</svg>`,'Denaturation breaks the R-group bonds that hold the fold. The peptide bonds (sequence) survive.'],
+
+'p-test': [`<svg viewBox="0 0 460 170" ${S}>
+ <g><rect x="60" y="40" width="50" height="100" rx="10" fill="#BFD9F2" stroke="#17202A" stroke-width="2"/><text x="85" y="160" text-anchor="middle" font-size="13">water</text><text x="85" y="28" text-anchor="middle" font-size="12">stays blue</text></g>
+ <g><rect x="205" y="40" width="50" height="100" rx="10" fill="#7E57C2" stroke="#17202A" stroke-width="2"/><text x="230" y="160" text-anchor="middle" font-size="13">egg white</text><text x="230" y="28" text-anchor="middle" font-size="12">purple = protein</text></g>
+ <g><rect x="350" y="40" width="50" height="100" rx="10" fill="#9E7BD0" stroke="#17202A" stroke-width="2"/><text x="375" y="160" text-anchor="middle" font-size="13">unknown</text><text x="375" y="28" text-anchor="middle" font-size="12">purple → has protein</text></g>
+</svg>`,'Biuret: negative control stays blue, positive control (egg white) goes purple, unknown is read against both.'],
+
+'exp': [`<svg viewBox="0 0 560 150" ${S}>
+ ${['IF … THEN …','independent: which solution','dependent: colour','controls: water / egg white','3 trials → table','conclusion + errors'].map((t,i)=>`<rect x="${10+i*92}" y="40" width="86" height="60" rx="9" fill="${i%2?'#ECE6F7':'#fff'}" stroke="#5B3E96"/><foreignObject x="${12+i*92}" y="44" width="82" height="54"><div xmlns="http://www.w3.org/1999/xhtml" style="font:12px/1.25 'Atkinson Hyperlegible',sans-serif;text-align:center;color:#17202A;padding-top:${i==0?'16px':'4px'}">${t}</div></foreignObject>${i<5?`<text x="${99+i*92}" y="75" text-anchor="middle" fill="#5B3E96">›</text>`:''}`).join('')}
+ <text x="280" y="130" text-anchor="middle" font-size="12" fill="#5B6570">the same six boxes for every experiment in the course</text>
+</svg>`,'Any test becomes an experiment when it has these six pieces.'],
+
+'method': [`<svg viewBox="0 0 560 120" ${S}>
+ ${['observe','hypothesis','experiment','conclusion','theory'].map((t,i)=>`<rect x="${20+i*108}" y="30" width="90" height="44" rx="22" fill="${i==4?'#5B3E96':'#ECE6F7'}" stroke="#5B3E96"/><text x="${65+i*108}" y="57" text-anchor="middle" font-size="14" fill="${i==4?'#fff':'#17202A'}">${t}</text>${i<4?`<text x="${118+i*108}" y="57" text-anchor="middle" fill="#5B3E96">→</text>`:''}`).join('')}
+ <text x="280" y="105" text-anchor="middle" font-size="12" fill="#5B6570">a theory is a hypothesis that has survived many experiments</text>
+</svg>`,'The order the exam asks for.'],
+
+'c-mono': [`<svg viewBox="0 0 420 230" ${S}>
+ <polygon points="210,60 275,95 275,160 210,195 145,160 145,95" fill="#fff" ${L}/>
+ <text x="275" y="90" text-anchor="middle" font-weight="700" fill="#B8322A" dx="16" dy="-4">O</text>
+ <text x="210" y="45" text-anchor="middle" font-weight="700">CH₂OH</text><line x1="210" y1="60" x2="210" y2="50" ${L}/>
+ <text x="130" y="90" text-anchor="end" font-size="13">OH</text><text x="130" y="170" text-anchor="end" font-size="13">OH</text>
+ <text x="210" y="218" text-anchor="middle" font-size="13">OH</text><text x="292" y="170" font-size="13">OH</text>
+ <text x="330" y="140" font-size="12" ${V}>5 C + 1 O in the ring,</text><text x="330" y="156" font-size="12" ${V}>carbon 6 as CH₂OH</text>
+ <text x="210" y="130" text-anchor="middle" font-size="13" fill="#5B6570">C₆H₁₂O₆</text>
+</svg>`,'Glucose ring: hexagon with oxygen at one corner, CH₂OH arm, OH groups on the ring carbons.'],
+
+'c-forms': [`<svg viewBox="0 0 560 150" ${S}>
+ <g><polygon points="60,40 90,55 90,85 60,100 30,85 30,55" fill="#ECE6F7" stroke="#5B3E96"/><text x="60" y="130" text-anchor="middle" font-size="12">glucose</text></g>
+ <text x="120" y="75" text-anchor="middle">+</text>
+ <g><polygon points="180,40 210,55 210,85 180,100 150,85 150,55" fill="#ECE6F7" stroke="#5B3E96"/><text x="180" y="130" text-anchor="middle" font-size="12">glucose</text></g>
+ <text x="250" y="70" text-anchor="middle" font-size="12" fill="#B8322A">– H₂O</text><text x="250" y="88" text-anchor="middle">→</text>
+ <g><polygon points="320,40 350,55 350,85 320,100 290,85 290,55" fill="#ECE6F7" stroke="#5B3E96"/><polygon points="380,40 410,55 410,85 380,100 350,85 350,55" fill="#ECE6F7" stroke="#5B3E96"/><text x="350" y="130" text-anchor="middle" font-size="12">maltose (disaccharide)</text></g>
+ <text x="460" y="75" text-anchor="middle">…</text>
+ <g>${[0,1,2].map(i=>`<polygon points="${500+i*22},55 ${515+i*22},62 ${515+i*22},78 ${500+i*22},85 ${485+i*22},78 ${485+i*22},62" fill="#ECE6F7" stroke="#5B3E96"/>`).join('')}<text x="522" y="130" text-anchor="middle" font-size="12">starch / glycogen /</text><text x="522" y="144" text-anchor="middle" font-size="12">cellulose (poly)</text></g>
+</svg>`,'Mono → di → poly, one dehydration synthesis per join.'],
+
+'c-test': [`<svg viewBox="0 0 460 170" ${S}>
+ <g><rect x="40" y="40" width="50" height="100" rx="10" fill="#C99A3B" stroke="#17202A" stroke-width="2"/><text x="65" y="160" text-anchor="middle" font-size="13">iodine + water</text></g>
+ <g><rect x="150" y="40" width="50" height="100" rx="10" fill="#1C2B4A" stroke="#17202A" stroke-width="2"/><text x="175" y="160" text-anchor="middle" font-size="13">iodine + starch</text></g>
+ <g><rect x="270" y="40" width="50" height="100" rx="10" fill="#4A90D9" stroke="#17202A" stroke-width="2"/><text x="295" y="160" text-anchor="middle" font-size="13">Benedict's + water</text></g>
+ <g><rect x="380" y="40" width="50" height="100" rx="10" fill="#C0392B" stroke="#17202A" stroke-width="2"/><text x="405" y="160" text-anchor="middle" font-size="13">Benedict's + glucose</text></g>
+ <text x="230" y="25" text-anchor="middle" font-size="12" fill="#5B6570">brown → blue-black = starch · blue → brick red (heated) = simple sugar</text>
+</svg>`,'The two carbohydrate tests side by side.'],
+
+'l-mono': [`<svg viewBox="0 0 560 200" ${S}>
+ <text x="20" y="30" font-weight="700">saturated</text>
+ <rect x="20" y="45" width="64" height="32" rx="7" fill="#FDECEA" stroke="#B8322A"/><text x="52" y="66" text-anchor="middle" font-size="13">COOH</text>
+ <polyline points="84,61 104,45 124,61 144,45 164,61 184,45 204,61 224,45 244,61 264,45 284,61" fill="none" ${L}/>
+ <text x="300" y="66" font-size="12" fill="#5B6570">straight, packs tight → solid</text>
+ <text x="20" y="120" font-weight="700">unsaturated</text>
+ <rect x="20" y="135" width="64" height="32" rx="7" fill="#FDECEA" stroke="#B8322A"/><text x="52" y="156" text-anchor="middle" font-size="13">COOH</text>
+ <polyline points="84,151 104,135 124,151 144,135 164,151" fill="none" ${L}/>
+ <line x1="164" y1="151" x2="184" y2="135" stroke="#B8322A" stroke-width="4"/>
+ <polyline points="184,135 200,115 216,135 232,115 248,135 264,115" fill="none" ${L}/>
+ <text x="176" y="185" font-size="12" fill="#B8322A">C=C → kink, fewer H</text>
+ <text x="300" y="156" font-size="12" fill="#5B6570">bent, can't pack → liquid (oil)</text>
+</svg>`,'A fatty acid is a carboxyl head and a hydrocarbon tail; a double bond puts a kink in it.'],
+
+'l-forms': [`<svg viewBox="0 0 560 210" ${S}>
+ <g><text x="20" y="24" font-weight="700">triglyceride</text>
+  <rect x="20" y="40" width="30" height="120" rx="6" fill="#ECE6F7" stroke="#5B3E96"/><text x="35" y="105" text-anchor="middle" font-size="11" transform="rotate(-90 35 105)">glycerol</text>
+  ${[55,95,135].map(y=>`<polyline points="50,${y} 70,${y-8} 90,${y} 110,${y-8} 130,${y} 150,${y-8} 170,${y} 190,${y-8} 210,${y}" fill="none" ${L}/>`).join('')}
+  <text x="120" y="185" text-anchor="middle" font-size="12" fill="#B8322A">3 fatty acids, 3 H₂O removed</text></g>
+ <g><text x="290" y="24" font-weight="700">phospholipid</text>
+  <circle cx="330" cy="70" r="22" fill="#5B3E96"/><text x="330" y="75" text-anchor="middle" font-size="12" fill="#fff">P</text>
+  <polyline points="352,60 372,52 392,60 412,52 432,60 452,52" fill="none" ${L}/><polyline points="352,82 372,90 392,82 412,90 432,82 452,90" fill="none" ${L}/>
+  <text x="330" y="110" text-anchor="middle" font-size="11" ${V}>polar head</text><text x="410" y="115" text-anchor="middle" font-size="11">non-polar tails</text>
+  ${[0,1,2,3,4,5].map(i=>`<circle cx="${300+i*30}" cy="150" r="9" fill="#5B3E96"/><line x1="${296+i*30}" y1="159" x2="${296+i*30}" y2="180" ${L}/><line x1="${304+i*30}" y1="159" x2="${304+i*30}" y2="180" ${L}/><circle cx="${300+i*30}" cy="205" r="9" fill="#5B3E96"/><line x1="${296+i*30}" y1="196" x2="${296+i*30}" y2="180" ${L}/><line x1="${304+i*30}" y1="196" x2="${304+i*30}" y2="180" ${L}/>`).join('')}
+  <text x="500" y="182" font-size="11" fill="#5B6570">bilayer</text></g>
+</svg>`,'Triglyceride: glycerol spine with three tails. Phospholipid: one tail swapped for phosphate, so it lines up as a membrane.'],
+
+'l-test': [`<svg viewBox="0 0 360 170" ${S}>
+ <g><rect x="60" y="40" width="50" height="100" rx="10" fill="#BFD9F2" stroke="#17202A" stroke-width="2"/><text x="85" y="160" text-anchor="middle" font-size="13">Sudan IV + water</text></g>
+ <g><rect x="230" y="40" width="50" height="100" rx="10" fill="#BFD9F2" stroke="#17202A" stroke-width="2"/><rect x="230" y="40" width="50" height="30" rx="10" fill="#C0392B"/><text x="255" y="160" text-anchor="middle" font-size="13">Sudan IV + oil</text><text x="255" y="28" text-anchor="middle" font-size="12" fill="#B8322A">red layer = lipid</text></g>
+</svg>`,'The dye dissolves only in lipid.'],
+
+'n-mono': [`<svg viewBox="0 0 420 160" ${S}>
+ <circle cx="70" cy="80" r="30" fill="#5B3E96"/><text x="70" y="86" text-anchor="middle" fill="#fff" font-weight="700">P</text>
+ <line x1="100" y1="80" x2="140" y2="80" ${L}/>
+ <polygon points="180,45 220,72 205,115 155,115 140,72" fill="#ECE6F7" stroke="#5B3E96" stroke-width="2"/><text x="180" y="90" text-anchor="middle" font-size="12">sugar</text>
+ <line x1="220" y1="72" x2="260" y2="72" ${L}/>
+ <rect x="260" y="50" width="120" height="50" rx="6" fill="#E6F2EC" stroke="#2F7A5A"/><text x="320" y="80" text-anchor="middle" font-size="13">base A T G C</text>
+ <text x="70" y="135" text-anchor="middle" font-size="12">phosphate</text><text x="180" y="140" text-anchor="middle" font-size="12">deoxyribose / ribose</text><text x="320" y="125" text-anchor="middle" font-size="12">U in RNA</text>
+</svg>`,'Circle – pentagon – rectangle: the nucleotide as the test wants it drawn.'],
+
+'n-forms': [`<svg viewBox="0 0 460 190" ${S}>
+ <line x1="60" y1="20" x2="60" y2="170" stroke="#5B3E96" stroke-width="8"/><line x1="400" y1="20" x2="400" y2="170" stroke="#5B3E96" stroke-width="8"/>
+ ${[['A','T',2,45],['G','C',3,85],['T','A',2,125],['C','G',3,165]].map(([a,b,n,y])=>`<rect x="66" y="${y-14}" width="150" height="28" rx="5" fill="#E6F2EC" stroke="#2F7A5A"/><text x="140" y="${y+5}" text-anchor="middle">${a}</text><rect x="244" y="${y-14}" width="150" height="28" rx="5" fill="#E6F2EC" stroke="#2F7A5A"/><text x="320" y="${y+5}" text-anchor="middle">${b}</text>${Array.from({length:n},(_,i)=>`<line x1="216" y1="${y-6+i*(12/(n-1))}" x2="244" y2="${y-6+i*(12/(n-1))}" stroke="#B8322A" stroke-width="2" stroke-dasharray="3 2"/>`).join('')}`).join('')}
+ <text x="230" y="14" text-anchor="middle" font-size="12" fill="#B8322A">hydrogen bonds: A=T two, G≡C three</text>
+</svg>`,'Complementary base pairing held by hydrogen bonds. A always equals T, G always equals C.'],
+
+'atp': [`<svg viewBox="0 0 460 120" ${S}>
+ <rect x="20" y="40" width="90" height="40" rx="6" fill="#E6F2EC" stroke="#2F7A5A"/><text x="65" y="65" text-anchor="middle" font-size="13">adenine</text>
+ <polygon points="150,30 180,50 170,85 130,85 120,50" fill="#ECE6F7" stroke="#5B3E96"/><text x="150" y="65" text-anchor="middle" font-size="12">ribose</text>
+ ${[220,280,340].map((x,i)=>`<circle cx="${x}" cy="60" r="22" fill="#5B3E96"/><text x="${x}" y="66" text-anchor="middle" fill="#fff" font-weight="700">P</text>`).join('')}
+ <line x1="180" y1="60" x2="198" y2="60" ${L}/><line x1="242" y1="60" x2="258" y2="60" ${L}/><path d="M302 60 L318 60" stroke="#B8322A" stroke-width="5"/>
+ <text x="380" y="45" font-size="12" fill="#B8322A">this bond</text><text x="380" y="62" font-size="12" fill="#B8322A">releases</text><text x="380" y="79" font-size="12" fill="#B8322A">the energy</text>
+ <text x="230" y="108" text-anchor="middle" font-size="12" fill="#5B6570">ATP → ADP + P + energy</text>
+</svg>`,'ATP is just a nucleotide with three phosphates.'],
+
+'water-polar': [`<svg viewBox="0 0 460 190" ${S}>
+ <g><circle cx="130" cy="80" r="34" fill="#B8322A"/><text x="130" y="87" text-anchor="middle" fill="#fff" font-weight="700">O</text><text x="130" y="35" text-anchor="middle" font-size="12" fill="#B8322A">δ–</text>
+  <circle cx="80" cy="130" r="20" fill="#BFD9F2" stroke="#17202A"/><text x="80" y="136" text-anchor="middle">H</text><text x="52" y="160" font-size="12" fill="#5B3E96">δ+</text>
+  <circle cx="180" cy="130" r="20" fill="#BFD9F2" stroke="#17202A"/><text x="180" y="136" text-anchor="middle">H</text><text x="196" y="160" font-size="12" fill="#5B3E96">δ+</text></g>
+ <line x1="220" y1="80" x2="290" y2="80" stroke="#B8322A" stroke-width="2" stroke-dasharray="4 3"/><text x="255" y="70" text-anchor="middle" font-size="11" fill="#B8322A">H bond</text>
+ <g transform="translate(200,-20) scale(.8)"><circle cx="230" cy="130" r="20" fill="#BFD9F2" stroke="#17202A"/><text x="230" y="136" text-anchor="middle">H</text><circle cx="280" cy="80" r="34" fill="#B8322A"/><text x="280" y="87" text-anchor="middle" fill="#fff" font-weight="700">O</text><circle cx="330" cy="130" r="20" fill="#BFD9F2" stroke="#17202A"/><text x="330" y="136" text-anchor="middle">H</text></g>
+ <text x="230" y="180" text-anchor="middle" font-size="12" fill="#5B6570">oxygen hogs the electrons → partial charges → neighbours stick</text>
+</svg>`,'A polar water molecule and the hydrogen bond to its neighbour.'],
+
+'ph': [`<svg viewBox="0 0 560 130" ${S}>
+ <defs><linearGradient id="phg" x1="0" x2="1"><stop offset="0" stop-color="#C0392B"/><stop offset=".5" stop-color="#7DBB6A"/><stop offset="1" stop-color="#5B3E96"/></linearGradient></defs>
+ <rect x="20" y="40" width="520" height="26" rx="13" fill="url(#phg)"/>
+ ${[0,7,14].map(v=>`<text x="${20+v*520/14}" y="90" text-anchor="middle" font-size="13">${v}</text>`).join('')}
+ ${[[2,'stomach 2'],[7.4,'blood 7.4'],[8.5,'intestine 8.5']].map(([v,t])=>`<line x1="${20+v*520/14}" y1="30" x2="${20+v*520/14}" y2="76" ${L}/><text x="${20+v*520/14}" y="24" text-anchor="middle" font-size="12" font-weight="700">${t}</text>`).join('')}
+ <text x="60" y="118" font-size="12" fill="#B8322A">more H⁺ (acid)</text><text x="500" y="118" text-anchor="end" font-size="12" ${V}>more OH⁻ (base)</text>
+</svg>`,'The three numbers the exam asks for, on the scale.'],
+
+'build': [`<svg viewBox="0 0 560 150" ${S}>
+ <rect x="30" y="50" width="70" height="44" rx="8" fill="#ECE6F7" stroke="#5B3E96"/><text x="65" y="77" text-anchor="middle" font-size="13">mono</text>
+ <rect x="130" y="50" width="70" height="44" rx="8" fill="#ECE6F7" stroke="#5B3E96"/><text x="165" y="77" text-anchor="middle" font-size="13">mono</text>
+ <text x="115" y="78" text-anchor="middle">+</text>
+ <path d="M215 60 L300 60" ${L} marker-end="url(#a1)"/><path d="M300 86 L215 86" ${L} marker-end="url(#a1)"/>
+ <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#17202A"/></marker></defs>
+ <text x="257" y="50" text-anchor="middle" font-size="12" fill="#B8322A">dehydration synthesis, – H₂O</text><text x="257" y="108" text-anchor="middle" font-size="12" fill="#2F7A5A">hydrolysis, + H₂O</text>
+ <rect x="320" y="50" width="200" height="44" rx="8" fill="#ECE6F7" stroke="#5B3E96"/><text x="420" y="77" text-anchor="middle" font-size="13">mono–mono (polymer)</text>
+</svg>`,'The one reversible reaction behind every family.'],
+
+'homeo': [`<svg viewBox="0 0 560 170" ${S}>
+ ${[['stimulus','#fff'],['receptor','#ECE6F7'],['control centre','#ECE6F7'],['effector','#ECE6F7'],['response','#fff']].map(([t,f],i)=>`<rect x="${20+i*108}" y="40" width="96" height="44" rx="10" fill="${f}" stroke="#5B3E96"/><text x="${68+i*108}" y="67" text-anchor="middle" font-size="12">${t}</text>${i<4?`<text x="${123+i*108}" y="67" text-anchor="middle" fill="#5B3E96">→</text>`:''}`).join('')}
+ <path d="M500 84 C 500 130, 68 130, 68 84" fill="none" stroke="#B8322A" stroke-width="2" stroke-dasharray="6 4"/>
+ <text x="284" y="142" text-anchor="middle" font-size="12" fill="#B8322A">negative feedback: the response cancels the stimulus</text>
+ <text x="284" y="162" text-anchor="middle" font-size="12" fill="#5B6570">e.g. hot → skin receptors → hypothalamus → sweat glands → cooler</text>
+</svg>`,'The loop the exam wants in this order.'],
+};
+D['p-sec']=D['p-struct']; D['p-prim']=D['p-struct']; D['p-quat']=D['p-struct'];
+D['aa-amino']=D['p-mono']; D['aa-carboxyl']=D['p-mono']; D['aa-r']=D['p-mono']; D['aa-central']=D['p-mono'];
+D['l-sat']=D['l-mono']; D['l-unsat']=D['l-mono']; D['water-hbond']=D['water-polar'];
+
+// index
+const byId={}, parent={};
+(function walk(n,p){ byId[n.id]=n; parent[n.id]=p; (n.k||[]).forEach(c=>walk(c,n.id)); })(N,null);
+
+let cur='root';
+const $=s=>document.querySelector(s);
+
+function count(n){ return (n.k||[]).reduce((a,c)=>a+1+count(c),0); }
+function buildTree(){
+  const box=$('#treebox'); box.innerHTML='';
+  const mk=(n)=>{
+    const li=document.createElement('li');
+    const b=document.createElement('button'); b.textContent=n.t; b.dataset.id=n.id;
+    const c=count(n); if(c){ const s=document.createElement('span'); s.className='n'; s.textContent=c; b.appendChild(s); }
+    b.onclick=()=>go(n.id); li.appendChild(b);
+    if(n.k){ const ul=document.createElement('ul'); n.k.forEach(k=>ul.appendChild(mk(k))); li.appendChild(ul); }
+    return li;
+  };
+  const ul=document.createElement('ul'); ul.appendChild(mk(N)); box.appendChild(ul);
+}
+function go(id){
+  cur=id; const n=byId[id];
+  document.querySelectorAll('.tree button[data-id]').forEach(b=>b.classList.toggle('on',b.dataset.id===id));
+  // crumbs
+  const path=[]; let p=id; while(p){ path.unshift(p); p=parent[p]; }
+  $('#crumbs').innerHTML = path.slice(0,-1).map(pid=>`<span><button data-go="${pid}">${byId[pid].t}</button></span>`).join('');
+  $('#crumbs').querySelectorAll('button').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  $('#title').textContent=n.t; $('#line').textContent=n.l; $('#body').innerHTML=(D[id]?`<figure class="fig">${D[id][0]}<figcaption>${D[id][1]}</figcaption></figure>`:'')+(n.b||'');
+  $('#kids').innerHTML = n.k ? `<div class="h3">Open up</div><div class="kids">`+n.k.map(c=>`<button class="kid" data-go="${c.id}"><div><b>${c.t}</b><span>${c.l}</span></div><i>›</i></button>`).join('')+`</div>` : '';
+  $('#kids').querySelectorAll('button').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  $('#links').innerHTML = n.x ? `<div class="h3">Connects to</div><div class="links">`+n.x.map(x=>`<button data-go="${x}">${byId[x].t}</button>`).join('')+`</div>` : '';
+  $('#links').querySelectorAll('button').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  const up=$('#up'); if(parent[id]){ up.style.display='inline'; up.textContent='Zoom out to '+byId[parent[id]].t; up.onclick=()=>go(parent[id]); } else up.style.display='none';
+  $('#tree').classList.remove('open'); window.scrollTo({top:0});
+  try{ location.hash=id; }catch(e){}
+}
+$('#menu').onclick=()=>$('#tree').classList.add('open');
+$('#close').onclick=()=>$('#tree').classList.remove('open');
+buildTree();
+go(byId[location.hash.slice(1)] ? location.hash.slice(1) : 'root');
+</script>
+</body>
+</html>
