@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A&amp;P 12 · Unit 1 Biochem drill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F5F2; --ink:#17202A; --mute:#5B6570; --line:#D6DBD7;
+  --violet:#5B3E96; --violet-soft:#E9E2F5; --navy:#1C2B4A;
+  --right:#2F7A5A; --wrong:#B8322A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#141A22; --ink:#EEF1F4; --mute:#9AA5B1; --line:#2A3441;
+    --violet:#B39DDB; --violet-soft:#2B2340; --navy:#C9D4E5;
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.45}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,.chip:focus-visible{outline:3px solid var(--violet);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding:20px 18px 40px}
+h1{font-size:1.15rem;font-weight:700;margin:0 0 2px;color:var(--navy)}
+.sub{color:var(--mute);margin:0 0 18px;font-size:.95rem}
+.modes{display:flex;gap:6px;border:1.5px solid var(--line);border-radius:12px;padding:4px;margin-bottom:14px}
+.modes button{flex:1;padding:8px 0;border-radius:8px;font-weight:700;color:var(--mute)}
+.modes button[aria-pressed="true"]{background:var(--violet);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.chip{border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.88rem;color:var(--mute)}
+.chip[aria-pressed="true"]{border-color:var(--violet);background:var(--violet-soft);color:var(--ink)}
+.stats{display:flex;justify-content:space-between;color:var(--mute);font-size:.9rem;margin-bottom:10px}
+.stats b{color:var(--ink)}
+/* card */
+.card{position:relative;min-height:260px;border-radius:20px;background:#fff;color:#17202A;border:2px solid var(--violet);
+  padding:26px 24px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;
+  transition:transform .35s;transform-style:preserve-3d}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card{background:#1E2733;color:#EEF1F4}}
+.card.flipped{transform:rotateY(180deg)}
+.face{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face.back{position:absolute;inset:0;padding:26px 24px;transform:rotateY(180deg);display:flex;flex-direction:column;justify-content:center}
+.topic{font-size:.8rem;color:var(--violet);margin-bottom:10px}
+.q{font-size:1.35rem;font-weight:700;line-height:1.3}
+.a{font-size:1.15rem;line-height:1.4}
+.hint{position:absolute;bottom:12px;right:18px;font-size:.78rem;color:var(--mute)}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+.grade{display:flex;gap:10px;margin-top:14px}
+.grade button{flex:1;padding:14px 0;border-radius:14px;font-weight:700;font-size:1.05rem;border:2px solid var(--line)}
+.grade .again{border-color:var(--wrong);color:var(--wrong)}
+.grade .know{border-color:var(--right);color:var(--right)}
+.grade button:active{transform:scale(.98)}
+.nav{display:flex;justify-content:space-between;margin-top:10px;font-size:.9rem}
+.nav button{color:var(--mute);padding:6px 4px;text-decoration:underline}
+/* quiz */
+.opts{display:grid;gap:10px;margin-top:16px}
+.opt{text-align:left;border:2px solid var(--line);border-radius:14px;padding:13px 16px;background:transparent;line-height:1.35}
+.opt.right{border-color:var(--right);background:rgba(47,122,90,.12)}
+.opt.wrong{border-color:var(--wrong);background:rgba(184,50,42,.12)}
+.opt:disabled{cursor:default}
+.next{margin-top:14px;width:100%;padding:14px;border-radius:14px;background:var(--violet);color:#fff;font-weight:700;font-size:1.05rem}
+.done{text-align:center;padding:30px 10px}
+.done .big{font-size:3rem;font-weight:700;color:var(--violet);line-height:1}
+.misses{margin-top:20px;text-align:left}
+.misses li{margin-bottom:10px}
+.misses span{color:var(--mute)}
+.empty{text-align:center;color:var(--mute);padding:40px 10px}
+kbd{font-family:inherit;border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:.8rem}
+.foot{margin-top:28px;font-size:.82rem;color:var(--mute)}
+.foot button{text-decoration:underline;color:var(--mute)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Anatomy &amp; Physiology 12 — Unit 1 Biochemistry</h1>
+  <p class="sub">Homeostasis, scientific method, water, pH, and the four biomolecules. Tap the card to flip.</p>
+
+  <div class="modes" role="group" aria-label="Mode">
+    <button id="m-cards" aria-pressed="true">Cards</button>
+    <button id="m-quiz" aria-pressed="false">Quiz</button>
+  </div>
+
+  <div class="chips" id="chips" role="group" aria-label="Topics"></div>
+
+  <div class="stats"><span id="left"></span><span id="score"></span></div>
+
+  <div id="stage"></div>
+
+  <p class="foot">Keys: <kbd>space</kbd> flip · <kbd>1</kbd> again · <kbd>2</kbd> know · <kbd>→</kbd> next.
+    Progress is saved in this browser. <button id="reset">Reset progress</button></p>
+</div>
+
+<script>
+const CARDS = [
+ // Scientific method
+ ["Method","Correct order of the scientific method","Observation → hypothesis → experiment → conclusion → theory"],
+ ["Method","Independent vs dependent variable","Independent = what you change. Dependent = what you measure."],
+ ["Method","What is the control in an experiment?","The group that gets every procedure except the one factor being tested"],
+ ["Method","A well-supported explanation backed by many experiments is a…","Theory"],
+ ["Method","Hypothesis format the teacher wants","IF (independent variable changes) THEN (dependent variable responds)"],
+ ["Method","Why run at least three trials?","Reliability — repeated results reduce the effect of random error"],
+ // Homeostasis
+ ["Homeostasis","Define homeostasis","Maintaining a constant internal environment (temperature, pH, glucose, water)"],
+ ["Homeostasis","Three parts of a feedback loop, in order","Receptor (detects) → control centre (brain/spinal cord) → effector (muscle or gland)"],
+ ["Homeostasis","Negative feedback — what it does and one example","Reverses the change to restore the set point. Thermostat; sweating; thyroxin↑ → TSH↓"],
+ ["Homeostasis","Positive feedback — what it does and one example","Amplifies the change until an end point. Oxytocin in labour; blood clotting"],
+ ["Homeostasis","Which type of feedback disrupts homeostasis?","Positive feedback"],
+ ["Homeostasis","Seven characteristics of life","Organized, metabolism, reproduce, respond to stimuli, homeostasis, grow/develop, adapt"],
+ // Atoms & bonds
+ ["Atoms & bonds","Atomic number vs mass number","Atomic number = protons. Mass number = protons + neutrons."],
+ ["Atoms & bonds","What makes isotopes different?","Same element, different number of neutrons (C-12, C-13, C-14)"],
+ ["Atoms & bonds","Covalent bond","Atoms share electrons — strong; holds H₂O and all organic molecules together"],
+ ["Atoms & bonds","Ionic bond","Electrons transferred, ions attract — NaCl"],
+ ["Atoms & bonds","Hydrogen bond","Weak attraction between a slightly + H and a slightly – O or N. Water, DNA base pairs, protein folding"],
+ ["Atoms & bonds","Organic vs inorganic compound","Organic contains carbon and hydrogen (the four biomolecules). Inorganic usually has no carbon (water, salts)"],
+ // Water
+ ["Water","Why is water polar?","Oxygen pulls the shared electrons more than hydrogen (unequal sharing) — O partly –, H partly +"],
+ ["Water","Bond between neighbouring water molecules","Hydrogen bond"],
+ ["Water","Water's job in cells (exam wording)","Acts as a solvent so chemical reactions can occur"],
+ ["Water","Why is water a temperature regulator?","High heat capacity — hydrogen bonds absorb heat before temperature rises"],
+ ["Water","Why does sweating cool you?","High heat of vaporization — evaporating water takes a lot of heat away"],
+ ["Water","Hydrophilic vs hydrophobic","Hydrophilic = polar or charged, dissolves in water. Hydrophobic = non-polar (fats), does not"],
+ ["Water","Why does ice float?","Water is less dense as a solid than as a liquid"],
+ // pH
+ ["pH & buffers","What does an acid release in water?","Hydrogen ions (H⁺) — pH goes down"],
+ ["pH & buffers","What does a base release?","Hydroxide ions (OH⁻), or it takes up H⁺ — pH goes up"],
+ ["pH & buffers","pH of blood, stomach, small intestine","Blood 7.4 · stomach 2 · small intestine 8–8.5"],
+ ["pH & buffers","pH goes from 2 to 5. What happened?","The solution lost H⁺ and became less acidic"],
+ ["pH & buffers","What is a buffer?","A substance that takes up excess H⁺ or OH⁻ so pH stays nearly constant"],
+ ["pH & buffers","Blood's buffer system","CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻"],
+ // Build/break
+ ["Monomers & polymers","Dehydration synthesis","Removes a water molecule to join two monomers — builds polymers"],
+ ["Monomers & polymers","Hydrolysis","Adds water to break a bond — breaks polymers into monomers (digestion)"],
+ ["Monomers & polymers","Product made in every dehydration synthesis","Water"],
+ ["Monomers & polymers","Why is carbon the backbone of biological molecules?","It forms four covalent bonds, so it makes chains, rings and branches"],
+ ["Monomers & polymers","Monomer of each: carbs, proteins, lipids, nucleic acids","Monosaccharides · amino acids · glycerol + fatty acids · nucleotides"],
+ ["Monomers & polymers","Name these groups: –OH, –COOH, –NH₂, –PO₄","Hydroxyl, carboxyl, amino, phosphate"],
+ // Carbs
+ ["Carbohydrates","Formula and H:O ratio of a carbohydrate","(CH₂O)ₙ — hydrogen to oxygen is 2:1"],
+ ["Carbohydrates","Three monosaccharides with formula C₆H₁₂O₆","Glucose, fructose, galactose"],
+ ["Carbohydrates","Maltose, sucrose, lactose are made of…","Glucose + glucose; glucose + fructose; glucose + galactose"],
+ ["Carbohydrates","Starch, glycogen, cellulose — what and where","All glucose polymers. Starch: plant storage. Glycogen: animal storage (liver, muscle). Cellulose: plant cell wall"],
+ ["Carbohydrates","Why can't humans digest cellulose?","Different linkage between the glucose units — no enzyme for it, so it's fibre"],
+ ["Carbohydrates","Which hydrolysis gives the most glucose?","A polysaccharide"],
+ // Lipids
+ ["Lipids","A triglyceride is made of…","One glycerol + three fatty acids (three waters removed)"],
+ ["Lipids","Saturated fatty acid","No C=C double bonds, straight chain, maximum hydrogen, solid at room temperature (animal fat)"],
+ ["Lipids","Unsaturated fatty acid","One or more C=C double bonds, kinked chain, fewer hydrogens, liquid (plant oil)"],
+ ["Lipids","How do you turn an oil into a fat?","Add hydrogen atoms (hydrogenation)"],
+ ["Lipids","A phospholipid is made of…","Glycerol + two fatty acids + a phosphate group"],
+ ["Lipids","Why do phospholipids form a bilayer?","Polar (hydrophilic) head faces water; non-polar (hydrophobic) tails hide inside"],
+ ["Lipids","Steroid structure and example","Four fused carbon rings — cholesterol, testosterone, estrogen (hormones)"],
+ ["Lipids","Jobs of lipids","Long-term energy storage, insulation, organ protection, membranes, hormones"],
+ // Proteins
+ ["Proteins","Four parts attached to an amino acid's central carbon","H, amino group (NH₂), carboxyl group (COOH), R group"],
+ ["Proteins","What differs between the 20 amino acids?","Only the R group"],
+ ["Proteins","How does a peptide bond form?","COOH of one amino acid + NH₂ of the next, water removed (dehydration synthesis)"],
+ ["Proteins","Primary structure","The linear sequence of amino acids, held by peptide bonds"],
+ ["Proteins","Secondary structure","Alpha helix or beta pleated sheet, held by hydrogen bonds along the backbone"],
+ ["Proteins","Tertiary structure","The overall 3D fold of one chain — R-group bonds (hydrogen, ionic, disulfide, hydrophobic). Makes the active site"],
+ ["Proteins","Quaternary structure","Two or more polypeptide chains together — hemoglobin has four"],
+ ["Proteins","What is denaturation? What causes it?","Loss of 3D shape (and function). Heat, pH extremes, chemicals. Sequence stays intact"],
+ ["Proteins","Everyday example of denaturation","Egg white turning solid when cooked; curdled milk; permed hair"],
+ ["Proteins","Which element is in protein but not carbs or lipids?","Nitrogen (from the amino group)"],
+ ["Proteins","Transcription vs translation","Transcription: DNA → mRNA (nucleus). Translation: mRNA → amino acid chain at the ribosome"],
+ ["Proteins","Five jobs of proteins","Enzymes, structure, transport (hemoglobin), antibodies, hormones (insulin)"],
+ // Nucleic acids
+ ["Nucleic acids & ATP","Three parts of a nucleotide","Phosphate, 5-carbon sugar, nitrogenous base"],
+ ["Nucleic acids & ATP","DNA vs RNA — sugar, bases, strands","DNA: deoxyribose, A T G C, double. RNA: ribose, A U G C, single"],
+ ["Nucleic acids & ATP","Base pairing rule and bond type","A–T (2 hydrogen bonds), G–C (3 hydrogen bonds)"],
+ ["Nucleic acids & ATP","Why does A always equal T in DNA?","Adenine on one strand pairs with thymine on the other"],
+ ["Nucleic acids & ATP","What is ATP made of?","Adenine + ribose + three phosphate groups"],
+ ["Nucleic acids & ATP","Where is the energy in ATP and how is it released?","In the phosphate bonds; ATP → ADP + P releases it"],
+ ["Nucleic acids & ATP","Energy from breaking down glucose is stored in…","ATP"],
+ // Lab
+ ["Lab tests","Biuret reagent — positive result and what it detects","Blue → purple/violet = protein"],
+ ["Lab tests","Iodine — positive result and what it detects","Brown → blue-black = starch"],
+ ["Lab tests","Sudan IV — positive result and what it detects","Red stain in the fat layer = lipid"],
+ ["Lab tests","Benedict's (heated) — positive result","Blue → orange/brick red = simple sugar"],
+ ["Lab tests","Positive vs negative control in the lab","Positive = a sample known to contain the substance. Negative = distilled water"],
+];
+
+const TOPICS = [...new Set(CARDS.map(c=>c[0]))];
+const KEY = 'ap12-u1-v1';
+let state = load();
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {again:{}, known:{}}; }catch(e){ return {again:{}, known:{}}; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+let mode = 'cards';
+let topic = 'All';
+let deck = [], idx = 0, flipped = false;
+let quiz = {order:[], i:0, score:0, misses:[], answered:false};
+
+const $ = s => document.querySelector(s);
+const stage = $('#stage');
+
+// chips
+const chips = $('#chips');
+['All', ...TOPICS].forEach(t=>{
+  const b = document.createElement('button');
+  b.className='chip'; b.textContent=t; b.setAttribute('aria-pressed', t===topic);
+  b.onclick=()=>{ topic=t; [...chips.children].forEach(c=>c.setAttribute('aria-pressed', c.textContent===t)); start(); };
+  chips.appendChild(b);
+});
+$('#m-cards').onclick=()=>setMode('cards');
+$('#m-quiz').onclick=()=>setMode('quiz');
+$('#reset').onclick=()=>{ if(confirm('Clear saved progress?')){ state={again:{},known:{}}; save(); start(); } };
+
+function setMode(m){ mode=m; $('#m-cards').setAttribute('aria-pressed', m==='cards'); $('#m-quiz').setAttribute('aria-pressed', m==='quiz'); start(); }
+function pool(){ return CARDS.map((c,i)=>i).filter(i=> topic==='All' || CARDS[i][0]===topic); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function start(){
+  if(mode==='cards'){
+    // "again" cards first, then the rest, both shuffled
+    const p = pool();
+    const ag = shuffle(p.filter(i=>state.again[i]));
+    const rest = shuffle(p.filter(i=>!state.again[i]));
+    deck = [...ag, ...rest]; idx=0; flipped=false; renderCard();
+  } else {
+    quiz = {order: shuffle(pool()), i:0, score:0, misses:[], answered:false}; renderQuiz();
+  }
+}
+
+function renderCard(){
+  const p = pool();
+  const known = p.filter(i=>state.known[i]).length;
+  const again = p.filter(i=>state.again[i]).length;
+  $('#left').innerHTML = `Card <b>${Math.min(idx+1,deck.length)}</b> of ${deck.length}`;
+  $('#score').innerHTML = `<b>${known}</b> known · <b>${again}</b> to redo`;
+  if(!deck.length){ stage.innerHTML='<p class="empty">No cards in this topic.</p>'; return; }
+  if(idx>=deck.length){
+    stage.innerHTML = `<div class="done"><div class="big">${known}/${p.length}</div><p>marked known in this set.</p>
+      <p>${again? again+' card'+(again>1?'s':'')+' marked "again" will come first next round.' : 'Nothing left to redo.'}</p>
+      <button class="next" id="restart">Go again</button></div>`;
+    $('#restart').onclick=start; return;
+  }
+  const c = CARDS[deck[idx]];
+  stage.innerHTML = `
+    <div class="card${flipped?' flipped':''}" id="card" role="button" tabindex="0" aria-label="Flashcard, tap to flip">
+      <div class="face front"><div class="topic">${c[0]}</div><div class="q">${c[1]}</div><div class="hint">tap to flip</div></div>
+      <div class="face back"><div class="topic">${c[0]}</div><div class="a">${c[2]}</div></div>
+    </div>
+    <div class="grade">
+      <button class="again" id="again">Again</button>
+      <button class="know" id="know">Know it</button>
+    </div>
+    <div class="nav"><button id="prev">Previous</button><button id="skip">Skip</button></div>`;
+  $('#card').onclick = flip;
+  $('#card').onkeydown = e=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); flip(); } };
+  $('#again').onclick = ()=>grade(false);
+  $('#know').onclick = ()=>grade(true);
+  $('#prev').onclick = ()=>{ if(idx>0){ idx--; flipped=false; renderCard(); } };
+  $('#skip').onclick = ()=>{ idx++; flipped=false; renderCard(); };
+}
+function flip(){ flipped=!flipped; $('#card').classList.toggle('flipped', flipped); }
+function grade(ok){
+  const i = deck[idx];
+  if(ok){ state.known[i]=1; delete state.again[i]; } else { state.again[i]=1; delete state.known[i]; }
+  save(); idx++; flipped=false; renderCard();
+}
+
+function renderQuiz(){
+  const q = quiz;
+  $('#left').innerHTML = `Question <b>${Math.min(q.i+1,q.order.length)}</b> of ${q.order.length}`;
+  $('#score').innerHTML = `Score <b>${q.score}</b>`;
+  if(!q.order.length){ stage.innerHTML='<p class="empty">No cards in this topic.</p>'; return; }
+  if(q.i>=q.order.length){
+    const pct = Math.round(100*q.score/q.order.length);
+    stage.innerHTML = `<div class="done"><div class="big">${pct}%</div><p>${q.score} of ${q.order.length} correct.</p>
+      ${q.misses.length? '<ol class="misses">'+q.misses.map(i=>`<li>${CARDS[i][1]}<br><span>${CARDS[i][2]}</span></li>`).join('')+'</ol>' : '<p>Clean sheet.</p>'}
+      <button class="next" id="restart">Try again</button></div>`;
+    $('#restart').onclick=start; return;
+  }
+  const ci = q.order[q.i]; const c = CARDS[ci];
+  // distractors: same topic first, then anything
+  const same = CARDS.map((x,i)=>i).filter(i=>i!==ci && CARDS[i][0]===c[0]);
+  const other = CARDS.map((x,i)=>i).filter(i=>i!==ci && CARDS[i][0]!==c[0]);
+  const ds = shuffle(same).slice(0,3); while(ds.length<3){ ds.push(shuffle(other).find(i=>!ds.includes(i))); }
+  const opts = shuffle([ci, ...ds]);
+  stage.innerHTML = `
+    <div class="card" style="cursor:default;min-height:0"><div class="face"><div class="topic">${c[0]}</div><div class="q">${c[1]}</div></div></div>
+    <div class="opts">${opts.map(i=>`<button class="opt" data-i="${i}">${CARDS[i][2]}</button>`).join('')}</div>
+    <div id="after"></div>`;
+  q.answered=false;
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.onclick=()=>{
+      if(q.answered) return; q.answered=true;
+      const pick = +b.dataset.i;
+      document.querySelectorAll('.opt').forEach(o=>{ o.disabled=true; if(+o.dataset.i===ci) o.classList.add('right'); });
+      if(pick===ci){ q.score++; } else { b.classList.add('wrong'); q.misses.push(ci); state.again[ci]=1; save(); }
+      $('#score').innerHTML = `Score <b>${q.score}</b>`;
+      $('#after').innerHTML = `<button class="next" id="next">Next</button>`;
+      $('#next').onclick=()=>{ q.i++; renderQuiz(); }; $('#next').focus();
+    };
+  });
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName==='BUTTON' && e.key===' ') return;
+  if(mode==='cards'){
+    if(e.key===' '){ e.preventDefault(); if($('#card')) flip(); }
+    if(e.key==='1' && $('#again')) grade(false);
+    if(e.key==='2' && $('#know')) grade(true);
+    if(e.key==='ArrowRight' && $('#skip')) $('#skip').click();
+    if(e.key==='ArrowLeft' && $('#prev')) $('#prev').click();
+  } else if(e.key==='ArrowRight' && $('#next')) $('#next').click();
+});
+
+start();
+</script>
+</body>
+</html>
