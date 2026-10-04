@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Transcription and mRNA processing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F6FA;--surface:#FFFFFF;--ink:#1B2238;--muted:#566079;--line:#DCE0EC;
+  --dna:#6A4FC2;--dna-soft:#ECE8FA;--rna:#0E857C;--rna-soft:#DDF3EF;
+  --pol:#C98516;--pol-soft:#FCEFD7;--enz:#B83C70;--enz-soft:#FBE5EE;--gray:#8C93A8;--gray-soft:#ECEEF3;
+  --good:#1F7A3F;--good-soft:#E2F4E7;--bad:#B3261E;--bad-soft:#FBE5E3;
+  --scale:1;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10131D;--surface:#181C29;--ink:#E7EAF4;--muted:#A2A9C0;--line:#2B3146;
+  --dna:#AE9BF2;--dna-soft:#28224A;--rna:#55D2C4;--rna-soft:#123834;
+  --pol:#F2B75A;--pol-soft:#3A2C12;--enz:#F28DB7;--enz-soft:#3B1C2A;--gray:#7D849B;--gray-soft:#252A3A;
+  --good:#6FD08C;--good-soft:#173322;--bad:#F2928B;--bad-soft:#3C1A18;}}
+:root[data-theme="dark"]{
+  --bg:#10131D;--surface:#181C29;--ink:#E7EAF4;--muted:#A2A9C0;--line:#2B3146;
+  --dna:#AE9BF2;--dna-soft:#28224A;--rna:#55D2C4;--rna-soft:#123834;
+  --pol:#F2B75A;--pol-soft:#3A2C12;--enz:#F28DB7;--enz-soft:#3B1C2A;--gray:#7D849B;--gray-soft:#252A3A;
+  --good:#6FD08C;--good-soft:#173322;--bad:#F2928B;--bad-soft:#3C1A18;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);font-size:calc(17px * var(--scale))}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6}
+h1,h2,h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;line-height:1.15;margin:0}
+h1{font-size:clamp(1.9rem,4.5vw,3rem);font-weight:750;letter-spacing:-0.02em}
+h2{font-size:clamp(1.5rem,3vw,2.1rem);font-weight:750;letter-spacing:-0.01em;margin-bottom:.4rem}
+h3{font-size:1.2rem;font-weight:600;margin-bottom:.5rem}
+p{margin:0 0 1rem}
+.wrap{max-width:1000px;margin:0 auto;padding:0 1.25rem}
+header{padding:2rem 0 1rem}
+.strand{display:flex;gap:4px;margin-top:1rem;flex-wrap:wrap}
+.strand span{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;font-weight:700;font-size:.8rem}
+.A{background:var(--pol-soft);color:var(--pol)}.U{background:var(--rna-soft);color:var(--rna)}.G{background:var(--dna-soft);color:var(--dna)}.C{background:var(--enz-soft);color:var(--enz)}
+.sub{color:var(--muted);font-size:1.05rem;margin-top:.5rem;max-width:62ch}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.tabs{display:flex;gap:.25rem;overflow-x:auto;padding:.5rem 0;scrollbar-width:thin}
+.tab{flex:none;font:inherit;font-size:.95rem;border:1px solid transparent;background:transparent;color:var(--muted);padding:.5rem .9rem;border-radius:999px;cursor:pointer}
+.tab:hover{color:var(--ink);background:var(--surface)}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.tab .n{opacity:.6;margin-right:.35rem}
+.tools{display:flex;gap:.5rem;align-items:center;justify-content:flex-end;padding:.5rem 0}
+button.ghost{font:inherit;font-size:.85rem;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:.4rem .75rem;cursor:pointer}
+button.ghost:hover{border-color:var(--muted)}
+:focus-visible{outline:3px solid var(--dna);outline-offset:2px}
+main{padding:2rem 0 4rem}
+section[hidden]{display:none}
+.lead{font-size:1.1rem;color:var(--muted);max-width:65ch;margin-bottom:1.5rem}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:1.5rem 0 2rem}
+.flow .node{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.7rem 1rem;min-width:130px}
+.flow .node b{display:block}
+.flow .node small{color:var(--muted)}
+.flow .arrow{color:var(--muted);font-size:1.3rem}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:1.25rem}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1.25rem 1.4rem}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.98rem}
+th,td{text-align:left;padding:.6rem .75rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:700;color:var(--muted);font-size:.85rem}
+td:first-child{font-weight:700;white-space:nowrap}
+.pairs td{text-align:center;font-size:1.2rem}
+.pairs th{text-align:center}
+input[type=text]{font:inherit;font-size:1.1rem;letter-spacing:.15em;width:100%;padding:.6rem .8rem;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);text-transform:uppercase}
+.out{font-size:1.4rem;letter-spacing:.15em;font-weight:700;color:var(--rna);min-height:2.2rem;margin-top:.6rem;word-break:break-all}
+.err{color:var(--bad);font-size:.9rem;min-height:1.3rem}
+ol.steps{list-style:none;padding:0;margin:0;counter-reset:s;display:grid;gap:1rem}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:3rem 1fr;gap:1rem;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.25rem}
+ol.steps li::before{content:counter(s);font-family:"Bricolage Grotesque",sans-serif;font-weight:750;font-size:1.8rem;color:var(--dna);line-height:1}
+ol.steps p{margin:0;color:var(--muted)}
+.note{border-left:4px solid var(--rna);background:var(--rna-soft);padding:.9rem 1.1rem;margin:1.5rem 0;border-radius:0}
+.note.warn{border-left-color:var(--pol);background:var(--pol-soft)}
+.stage-h{display:flex;align-items:baseline;gap:.75rem;margin:2rem 0 .75rem}
+.stage-h:first-of-type{margin-top:0}
+.chip{font-size:.8rem;font-weight:700;padding:.15rem .55rem;border-radius:999px;background:var(--gray-soft);color:var(--muted)}
+.quiz-tag{font-size:.75rem;font-weight:700;padding:.1rem .45rem;border-radius:6px;background:var(--good-soft);color:var(--good);margin-left:.4rem;white-space:nowrap}
+.pills{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+.pill{font:inherit;font-size:.85rem;padding:.35rem .75rem;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.pill.on{background:var(--dna-soft);color:var(--dna);border-color:var(--dna)}
+.svgbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:.5rem}
+.svgbox svg{display:block;width:100%;height:auto}
+.cap-t{font-weight:700;font-size:1.15rem;margin:1rem 0 .3rem}
+.controls{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem;align-items:center}
+.legend{display:flex;flex-wrap:wrap;gap:1rem;font-size:.85rem;color:var(--muted);margin-left:auto}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:.35rem;vertical-align:-1px}
+.a{animation-duration:var(--d,.8s);animation-delay:var(--w,0s);animation-fill-mode:both;animation-timing-function:ease-out}
+.gr{transform-box:fill-box;transform-origin:left center}
+@media (prefers-reduced-motion:no-preference){.a{animation-name:var(--n)}}
+@keyframes dropIn{from{transform:translateY(-50px);opacity:0}}
+@keyframes fromRight{from{transform:translateX(140px);opacity:0}}
+@keyframes fromLeft{from{transform:translateX(-80px);opacity:0}}
+@keyframes rise{from{transform:translateY(30px);opacity:0}}
+@keyframes pop{from{opacity:0}}
+@keyframes grow{from{transform:scaleX(0)}}
+@keyframes slideX{from{transform:translateX(-280px)}}
+@keyframes leave{to{transform:translate(50px,-70px);opacity:0}}
+@keyframes fadeOut{to{opacity:0}}
+@keyframes fadeDown{to{transform:translateY(16px)}}
+@keyframes lift{to{transform:translateY(-70px);opacity:0}}
+@keyframes shiftL{to{transform:translateX(-120px)}}
+svg text{fill:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,sans-serif}
+svg .sm{font-size:13px;fill:var(--muted)}
+svg .lb{font-size:15px;font-weight:700}
+.pol{fill:var(--pol-soft);stroke:var(--pol);stroke-width:1.5}
+.enz{fill:var(--enz-soft);stroke:var(--enz);stroke-width:1.5}
+.ex{fill:var(--rna-soft);stroke:var(--rna);stroke-width:1.5}
+.in{fill:var(--gray-soft);stroke:var(--gray);stroke-width:1.5}
+.tata{fill:var(--pol-soft);stroke:none}
+.q-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1.5rem}
+.q-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:.75rem;color:var(--muted);font-size:.9rem}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:1.25rem}
+.bar div{height:100%;background:var(--dna);transition:width .3s}
+.q-prompt{font-size:1.3rem;font-weight:700;margin-bottom:1rem}
+.opts{display:grid;gap:.6rem}
+.opt{font:inherit;text-align:left;font-size:1.05rem;padding:.8rem 1rem;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--dna)}
+.opt.right{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.opt:disabled{cursor:default}
+.fb{margin-top:1rem;padding:1rem;border-radius:10px;background:var(--bg)}
+.fb b{display:block;margin-bottom:.25rem}
+.primary{font:inherit;font-weight:700;background:var(--ink);color:var(--bg);border:none;border-radius:8px;padding:.6rem 1.1rem;cursor:pointer}
+.qfilter{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+.pager{display:flex;justify-content:space-between;margin-top:2.5rem;gap:1rem}
+@media (max-width:600px){ol.steps li{grid-template-columns:2rem 1fr}.legend{margin-left:0}}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <h1>Transcription and mRNA processing</h1>
+  <p class="sub">How a gene in DNA becomes a mature mRNA message that leaves the nucleus for the ribosomes.</p>
+  <div class="strand" aria-hidden="true">
+    <span class="A">A</span><span class="U">U</span><span class="G">G</span><span class="C">C</span><span class="C">C</span><span class="U">U</span><span class="A">A</span><span class="G">G</span><span class="U">U</span><span class="C">C</span><span class="A">A</span><span class="A">A</span><span class="G">G</span><span class="U">U</span><span class="G">G</span><span class="C">C</span>
+  </div>
+</header>
+
+<nav aria-label="Lesson sections">
+  <div class="wrap">
+    <div class="tabs" role="tablist" id="tabs"></div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div class="tools">
+    <button class="ghost" id="bigger" type="button">Larger text</button>
+    <button class="ghost" id="theme" type="button">Switch theme</button>
+  </div>
+
+  <!-- 1 Overview -->
+  <section id="overview" role="tabpanel" data-title="Overview">
+    <h2>From gene to message</h2>
+    <p class="lead">DNA stays in the nucleus. To build a protein, the cell copies a gene into mRNA, cleans that copy up, and sends it out to the ribosomes.</p>
+    <div class="flow">
+      <div class="node"><b>DNA</b><small>Gene in the nucleus</small></div><span class="arrow" aria-hidden="true">→</span>
+      <div class="node"><b>Transcription</b><small>RNA polymerase</small></div><span class="arrow" aria-hidden="true">→</span>
+      <div class="node"><b>Primary mRNA</b><small>Introns and exons</small></div><span class="arrow" aria-hidden="true">→</span>
+      <div class="node"><b>Processing</b><small>Ribozymes splice</small></div><span class="arrow" aria-hidden="true">→</span>
+      <div class="node"><b>Mature mRNA</b><small>To the cytoplasm</small></div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Base pairing: DNA template to mRNA</h3>
+        <div class="tw"><table class="pairs">
+          <tr><th>DNA template</th><td>A</td><td>T</td><td>G</td><td>C</td></tr>
+          <tr><th>mRNA</th><td style="color:var(--rna)">U</td><td style="color:var(--rna)">A</td><td style="color:var(--rna)">C</td><td style="color:var(--rna)">G</td></tr>
+        </table></div>
+        <p style="margin-top:1rem;color:var(--muted)">RNA has no thymine. Wherever the template has A, the mRNA gets U.</p>
+      </div>
+      <div class="panel">
+        <h3>Try it: transcribe a template strand</h3>
+        <label for="seq" style="color:var(--muted);font-size:.9rem">DNA template strand</label>
+        <input type="text" id="seq" value="TACGGATTC" autocomplete="off" spellcheck="false">
+        <div class="err" id="seqErr" role="alert"></div>
+        <div style="color:var(--muted);font-size:.9rem">mRNA</div>
+        <div class="out" id="seqOut"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 Transcription -->
+  <section id="transcription" role="tabpanel" data-title="Transcription" hidden>
+    <h2>Transcription</h2>
+    <p class="lead">A segment of DNA is copied into RNA. All three classes of RNA are made this way, but here we focus on mRNA.</p>
+    <ol class="steps">
+      <li><div><h3>The DNA unwinds and unzips</h3><p>A segment of the double helix opens up. Only one strand, the template strand, gets copied. The other is the inactive strand.</p></div></li>
+      <li><div><h3>RNA nucleotides pair with the template</h3><p>Free RNA nucleotides from the nucleotide pool in the nucleus pair with the exposed DNA bases: A with U, T with A, G with C, and C with G.</p></div></li>
+      <li><div><h3>RNA polymerase joins them</h3><p>The enzyme RNA polymerase links the RNA nucleotides together, producing an RNA molecule.</p></div></li>
+      <li><div><h3>mRNA carries codons</h3><p>The finished mRNA has a sequence of codons that are complementary to the DNA triplet code. The code has been transcribed, or copied.</p></div></li>
+    </ol>
+    <div class="note"><b>Key idea.</b> After transcription, mRNA has a base sequence complementary to one of the DNA strands, so its codons are complementary to the DNA triplets.</div>
+    <div class="grid2">
+      <div class="panel"><h3>Template strand</h3><p style="margin:0;color:var(--muted)">The DNA strand that is read and copied into mRNA.</p></div>
+      <div class="panel"><h3>Inactive strand</h3><p style="margin:0;color:var(--muted)">The partner DNA strand that is not copied.</p></div>
+      <div class="panel"><h3>Triplet vs codon</h3><p style="margin:0;color:var(--muted)">A triplet is three DNA bases. A codon is the matching three mRNA bases.</p></div>
+    </div>
+  </section>
+
+  <!-- 3 Enzymes -->
+  <section id="enzymes" role="tabpanel" data-title="Enzymes" hidden>
+    <h2>Enzymes by step</h2>
+    <p class="lead">The enzymes and proteins at each stage, and what each one does. Items tagged "on quiz" come straight from the reading.</p>
+
+    <div class="stage-h"><h3>1. Initiation</h3><span class="chip">Getting started</span></div>
+    <div class="panel tw"><table>
+      <tr><th>Enzyme or protein</th><th>What it does</th></tr>
+      <tr><td>TFIID (TATA-binding protein)</td><td>Binds the TATA box in the promoter and marks where transcription starts (eukaryotes).</td></tr>
+      <tr><td>Sigma (σ) factor</td><td>Recognizes the promoter and guides RNA polymerase to it (prokaryotes).</td></tr>
+      <tr><td>RNA polymerase II</td><td>Binds the promoter once transcription factors are in place.</td></tr>
+      <tr><td>TFIIH</td><td>Unwinds the DNA at the start site and phosphorylates Pol II so it can leave the promoter.</td></tr>
+    </table></div>
+
+    <div class="stage-h"><h3>2. Elongation</h3><span class="chip">Building the RNA</span></div>
+    <div class="panel tw"><table>
+      <tr><th>Enzyme or protein</th><th>What it does</th></tr>
+      <tr><td>RNA polymerase <span class="quiz-tag">On quiz</span></td><td>Unwinds DNA, reads the template strand 3'→5', and joins RNA nucleotides 5'→3'. No primer needed.</td></tr>
+      <tr><td>Topoisomerase</td><td>Relieves supercoiling that builds up in the DNA ahead of the polymerase.</td></tr>
+    </table></div>
+
+    <div class="stage-h"><h3>3. Termination</h3><span class="chip">Stopping</span></div>
+    <div class="panel tw"><table>
+      <tr><th>Enzyme or protein</th><th>What it does</th></tr>
+      <tr><td>Rho factor</td><td>A helicase that pulls the RNA off the DNA (prokaryotes). Some genes use an RNA hairpin instead.</td></tr>
+      <tr><td>Endonuclease</td><td>Cuts the pre-mRNA just past the AAUAAA signal (eukaryotes).</td></tr>
+      <tr><td>Exonuclease</td><td>Degrades the leftover RNA still attached to Pol II, knocking it off the DNA.</td></tr>
+    </table></div>
+
+    <div class="stage-h"><h3>4. mRNA processing</h3><span class="chip">Eukaryotes only</span></div>
+    <div class="panel tw"><table>
+      <tr><th>Enzyme or protein</th><th>What it does</th></tr>
+      <tr><td>Capping enzymes</td><td>Add a 7-methylguanosine cap to the 5' end for protection and ribosome binding.</td></tr>
+      <tr><td>Poly(A) polymerase</td><td>Adds a poly-A tail to the 3' end without a template, protecting the mRNA and helping export.</td></tr>
+      <tr><td>Ribozymes / spliceosome <span class="quiz-tag">On quiz</span></td><td>Remove introns and join exons. Ribozymes are catalysts made of RNA, not protein.</td></tr>
+    </table></div>
+
+    <div class="note warn"><b>Common trap.</b> Transcription does not use DNA polymerase, primase, or ligase. Those belong to DNA replication.</div>
+  </section>
+
+  <!-- 4 Animation -->
+  <section id="animation" role="tabpanel" data-title="Animation" hidden>
+    <h2>Watch it happen</h2>
+    <p class="lead">Each stage plays when you open it. Use Replay to show it again.</p>
+    <div class="pills" id="animPills"></div>
+    <div class="svgbox"><svg id="stage" viewBox="0 0 680 300" role="img" aria-labelledby="animTitle"><title id="animTitle">Transcription animation</title></svg></div>
+    <p class="cap-t" id="animTtl"></p>
+    <p style="color:var(--muted);max-width:70ch" id="animCap"></p>
+    <div class="controls">
+      <button class="ghost" type="button" id="aPrev">Back</button>
+      <button class="ghost" type="button" id="aReplay">Replay</button>
+      <button class="ghost" type="button" id="aNext">Next</button>
+      <button class="ghost" type="button" id="aPlay">Play all</button>
+      <div class="legend">
+        <span><i style="background:var(--dna)"></i>DNA</span>
+        <span><i style="background:var(--rna)"></i>RNA</span>
+        <span><i style="background:var(--pol)"></i>RNA polymerase</span>
+        <span><i style="background:var(--enz)"></i>Other enzymes</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Processing -->
+  <section id="processing" role="tabpanel" data-title="mRNA processing" hidden>
+    <h2>Processing of mRNA</h2>
+    <p class="lead">Most human genes are interrupted by segments that don't code for protein. Before mRNA leaves the nucleus, those segments are cut out.</p>
+    <div class="grid2">
+      <div class="panel" style="border-top:4px solid var(--gray);border-radius:0 0 14px 14px"><h3>Introns</h3><p style="margin:0;color:var(--muted)">Intragene segments. They are transcribed but removed, so they are not expressed.</p></div>
+      <div class="panel" style="border-top:4px solid var(--rna);border-radius:0 0 14px 14px"><h3>Exons</h3><p style="margin:0;color:var(--muted)">The parts that are ultimately expressed. Only exons result in a protein product.</p></div>
+    </div>
+
+    <h3 style="margin-top:2rem">Primary vs mature mRNA</h3>
+    <div class="panel tw"><table>
+      <tr><th></th><th>Primary mRNA</th><th>Mature mRNA</th></tr>
+      <tr><td>Contains</td><td>Introns and exons</td><td>Only exons, joined together</td></tr>
+      <tr><td>Location</td><td>Nucleus, right after transcription</td><td>Leaves the nucleus for the cytoplasm</td></tr>
+      <tr><td>Next step</td><td>Processed (spliced)</td><td>Associates with ribosomes</td></tr>
+    </table></div>
+
+    <div class="note"><b>Who does the splicing?</b> Ribozymes, which are organic catalysts made of RNA, not protein. Processing happens in the nucleus.</div>
+
+    <h3>Alternative splicing</h3>
+    <p style="color:var(--muted);max-width:68ch">Usually all exons are joined. Sometimes, especially during development, only some exons are kept. This produces different mRNA molecules and different but related proteins.</p>
+    <div class="svgbox">
+      <svg viewBox="0 0 680 250" role="img" aria-labelledby="altT"><title id="altT">One primary transcript spliced two ways into two different mature mRNAs</title>
+        <text class="sm" x="20" y="45">Primary</text>
+        <rect class="ex" x="100" y="28" width="90" height="28" rx="4"/><text class="lb" x="145" y="47" text-anchor="middle">Exon 1</text>
+        <rect class="in" x="190" y="28" width="70" height="28" rx="4"/><text class="sm" x="225" y="47" text-anchor="middle">intron</text>
+        <rect class="ex" x="260" y="28" width="90" height="28" rx="4"/><text class="lb" x="305" y="47" text-anchor="middle">Exon 2</text>
+        <rect class="in" x="350" y="28" width="70" height="28" rx="4"/><text class="sm" x="385" y="47" text-anchor="middle">intron</text>
+        <rect class="ex" x="420" y="28" width="90" height="28" rx="4"/><text class="lb" x="465" y="47" text-anchor="middle">Exon 3</text>
+        <path d="M305 62 L200 120" fill="none" stroke="var(--muted)" stroke-width="1.5"/>
+        <path d="M305 62 L470 120" fill="none" stroke="var(--muted)" stroke-width="1.5"/>
+        <text class="sm" x="200" y="140" text-anchor="middle">Keep all exons</text>
+        <text class="sm" x="470" y="140" text-anchor="middle">Skip exon 2</text>
+        <rect class="ex" x="65" y="155" width="90" height="28" rx="4"/><text class="lb" x="110" y="174" text-anchor="middle">1</text>
+        <rect class="ex" x="155" y="155" width="90" height="28" rx="4"/><text class="lb" x="200" y="174" text-anchor="middle">2</text>
+        <rect class="ex" x="245" y="155" width="90" height="28" rx="4"/><text class="lb" x="290" y="174" text-anchor="middle">3</text>
+        <rect class="ex" x="380" y="155" width="90" height="28" rx="4"/><text class="lb" x="425" y="174" text-anchor="middle">1</text>
+        <rect class="ex" x="470" y="155" width="90" height="28" rx="4"/><text class="lb" x="515" y="174" text-anchor="middle">3</text>
+        <text class="sm" x="200" y="210" text-anchor="middle">Protein A</text>
+        <text class="sm" x="470" y="210" text-anchor="middle">Protein B (related)</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 6 Quiz -->
+  <section id="quiz" role="tabpanel" data-title="Quiz" hidden>
+    <h2>Check your understanding</h2>
+    <p class="lead">Pick a question set, then choose an answer to see the explanation.</p>
+    <div class="qfilter" id="qfilter"></div>
+    <div class="q-card" id="qcard" aria-live="polite"></div>
+  </section>
+
+  <div class="pager">
+    <button class="ghost" type="button" id="prevTab">Previous section</button>
+    <button class="ghost" type="button" id="nextTab">Next section</button>
+  </div>
+</main>
+
+<script>
+(function(){
+  const sections=[...document.querySelectorAll('main section')];
+  const tabs=document.getElementById('tabs');
+  let current=0;
+  sections.forEach((s,i)=>{
+    const b=document.createElement('button');
+    b.className='tab';b.type='button';b.setAttribute('role','tab');b.id='tab-'+s.id;
+    b.setAttribute('aria-controls',s.id);s.setAttribute('aria-labelledby',b.id);
+    b.innerHTML='<span class="n">'+(i+1)+'</span>'+s.dataset.title;
+    b.addEventListener('click',()=>show(i));
+    tabs.appendChild(b);
+  });
+  function show(i,noScroll){
+    current=Math.max(0,Math.min(sections.length-1,i));
+    sections.forEach((s,j)=>s.hidden=j!==current);
+    [...tabs.children].forEach((t,j)=>{t.setAttribute('aria-selected',j===current);t.tabIndex=j===current?0:-1});
+    tabs.children[current].scrollIntoView({block:'nearest',inline:'center'});
+    history.replaceState(null,'','#'+sections[current].id);
+    if(sections[current].id==='animation')go(animCur);
+    else stopPlay();
+    if(!noScroll)window.scrollTo({top:0});
+  }
+  document.getElementById('prevTab').onclick=()=>show(current-1);
+  document.getElementById('nextTab').onclick=()=>show(current+1);
+  document.addEventListener('keydown',e=>{
+    if(e.target.matches('input,textarea'))return;
+    if(e.key==='ArrowRight')show(current+1);
+    if(e.key==='ArrowLeft')show(current-1);
+  });
+
+  let scale=1;
+  document.getElementById('bigger').onclick=e=>{
+    scale=scale===1?1.25:scale===1.25?1.5:1;
+    document.documentElement.style.setProperty('--scale',scale);
+    e.target.textContent=scale===1?'Larger text':scale===1.25?'Largest text':'Normal text';
+  };
+  document.getElementById('theme').onclick=()=>{
+    const r=document.documentElement;
+    const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    r.dataset.theme=dark?'light':'dark';
+  };
+
+  const map={A:'U',T:'A',G:'C',C:'G'};
+  const seq=document.getElementById('seq'),out=document.getElementById('seqOut'),err=document.getElementById('seqErr');
+  function conv(){
+    const v=seq.value.toUpperCase().replace(/\s/g,'');
+    if(/[^ATGC]/.test(v)){err.textContent='Use only the letters A, T, G, and C.';out.textContent='';return}
+    err.textContent='';
+    out.textContent=v.split('').map(c=>map[c]).join('').replace(/(.{3})/g,'$1 ').trim();
+  }
+  seq.addEventListener('input',conv);conv();
+
+  const S='stroke="var(--dna)" stroke-width="4" stroke-linecap="round"';
+  const dna=`<line x1="40" y1="150" x2="640" y2="150" ${S}/><line x1="40" y1="185" x2="640" y2="185" ${S}/><text class="sm" x="40" y="138">Inactive (coding) strand</text><text class="sm" x="40" y="207">Template strand</text>`;
+  const st=(n,w,d)=>`class="a" style="--n:${n};--w:${w}s;--d:${d||.8}s"`;
+  const R='stroke="var(--rna)" stroke-width="5" stroke-linecap="round"';
+  const steps=[
+  {t:'1. Initiation',c:"TFIID (with the TATA-binding protein) binds the TATA box. RNA polymerase II joins, and then TFIIH unwinds the DNA so transcription can begin. In prokaryotes, the sigma factor finds the promoter instead.",
+  s:`<rect class="tata" x="230" y="142" width="60" height="51" rx="4"/>${dna}<text class="sm" x="260" y="228" text-anchor="middle">TATA box</text>
+  <g ${st('dropIn',.2)}><rect class="enz" x="200" y="82" width="120" height="38" rx="8"/><text class="lb" x="260" y="106" text-anchor="middle">TFIID</text></g>
+  <g ${st('fromRight',1.0,1)}><ellipse class="pol" cx="410" cy="167" rx="72" ry="40"/><text class="lb" x="410" y="172" text-anchor="middle">RNA pol II</text></g>
+  <g ${st('dropIn',2.0)}><rect class="enz" x="470" y="82" width="110" height="38" rx="8"/><text class="lb" x="525" y="106" text-anchor="middle">TFIIH</text></g>
+  <text class="sm" x="525" y="252" text-anchor="middle" ${st('pop',2.6)}>DNA unwound, ready to go</text>`},
+  {t:'2. Elongation',c:"RNA polymerase reads the template strand and joins complementary RNA nucleotides into a growing RNA (A pairs with U, T with A, G with C, C with G). Topoisomerase relieves the twisting ahead of it.",
+  s:`${dna}<rect class="enz" x="535" y="82" width="115" height="38" rx="8"/><text class="lb" x="592" y="106" text-anchor="middle" style="font-size:13px">Topoisomerase</text>
+  <line class="a gr" style="--n:grow;--d:3s;animation-timing-function:linear" x1="120" y1="240" x2="440" y2="240" ${R}/>
+  <g class="a" style="--n:slideX;--d:3s;animation-timing-function:linear"><line x1="440" y1="205" x2="440" y2="240" ${R}/><ellipse class="pol" cx="480" cy="167" rx="72" ry="40"/><text class="lb" x="480" y="172" text-anchor="middle">RNA pol II</text></g>
+  <text class="sm" x="120" y="268">Growing RNA</text>`},
+  {t:'3. Termination',c:"Past the AAUAAA signal, an endonuclease cuts the RNA and frees the transcript. An exonuclease chews up the leftover RNA and knocks RNA polymerase off. In prokaryotes, the Rho factor or an RNA hairpin ends transcription.",
+  s:`${dna}<g ${st('fadeDown',1.0)}><line x1="120" y1="240" x2="460" y2="240" ${R}/><text class="sm" x="400" y="227" text-anchor="middle">AAUAAA</text></g>
+  <path ${st('fadeOut',2.2)} d="M468 240H500V205" fill="none" ${R}/>
+  <g ${st('leave',2.8,1)}><ellipse class="pol" cx="540" cy="167" rx="72" ry="40"/><text class="lb" x="540" y="172" text-anchor="middle">RNA pol II</text></g>
+  <g ${st('rise',.3)}><rect class="enz" x="395" y="258" width="120" height="32" rx="8"/><text class="lb" x="455" y="279" text-anchor="middle" style="font-size:13px">Endonuclease</text></g>
+  <g ${st('rise',1.5)}><circle class="enz" cx="484" cy="240" r="9"/><rect class="enz" x="525" y="258" width="120" height="32" rx="8"/><text class="lb" x="585" y="279" text-anchor="middle" style="font-size:13px">Exonuclease</text></g>`},
+  {t:'4. Processing: cap and tail',c:"Capping enzymes add a modified guanine cap to the 5' end. Poly(A) polymerase adds the poly-A tail to the 3' end. Both protect the mRNA.",
+  s:`<line x1="180" y1="165" x2="500" y2="165" ${R}/><text class="sm" x="340" y="198" text-anchor="middle">Primary mRNA</text>
+  <g ${st('fromLeft',.2)}><rect class="enz" x="55" y="82" width="140" height="38" rx="8"/><text class="lb" x="125" y="106" text-anchor="middle" style="font-size:13px">Capping enzymes</text></g>
+  <g ${st('pop',1.0)}><circle class="ex" cx="166" cy="165" r="14"/><text class="lb" x="166" y="170" text-anchor="middle">G</text><text class="sm" x="166" y="208" text-anchor="middle">5' cap</text></g>
+  <g ${st('dropIn',1.6)}><rect class="enz" x="465" y="82" width="160" height="38" rx="8"/><text class="lb" x="545" y="106" text-anchor="middle" style="font-size:13px">Poly(A) polymerase</text></g>
+  <g class="a gr" style="--n:grow;--w:2.2s;--d:1.2s"><rect class="ex" x="504" y="155" width="112" height="20" rx="4"/><text class="sm" x="560" y="170" text-anchor="middle" style="fill:var(--rna);font-weight:700">AAAAAAAA</text></g>
+  <text class="sm" x="560" y="208" text-anchor="middle" ${st('pop',3.2)}>Poly-A tail</text>`},
+  {t:'5. Processing: splicing',c:"Ribozymes (in the spliceosome) cut out the intron and join the exons. The mature mRNA, now only exons, leaves the nucleus and goes to the ribosomes in the cytoplasm.",
+  s:`<circle class="ex" cx="175" cy="165" r="14"/><text class="lb" x="175" y="170" text-anchor="middle">G</text>
+  <rect class="ex" x="190" y="150" width="100" height="30" rx="4"/><text class="lb" x="240" y="170" text-anchor="middle">Exon 1</text>
+  <g ${st('lift',1.8,1)}><rect class="in" x="290" y="150" width="120" height="30" rx="4"/><text class="sm" x="350" y="170" text-anchor="middle">Intron</text>
+  <g ${st('dropIn',.3)}><rect class="enz" x="285" y="92" width="130" height="48" rx="8"/><text class="lb" x="350" y="113" text-anchor="middle" style="font-size:14px">Ribozymes</text><text class="sm" x="350" y="131" text-anchor="middle">spliceosome</text></g></g>
+  <g ${st('shiftL',2.6)}><rect class="ex" x="410" y="150" width="100" height="30" rx="4"/><text class="lb" x="460" y="170" text-anchor="middle">Exon 2</text><rect class="ex" x="512" y="156" width="96" height="18" rx="4"/><text class="sm" x="560" y="170" text-anchor="middle" style="fill:var(--rna);font-weight:700">AAAAAAA</text></g>
+  <text class="lb" x="340" y="235" text-anchor="middle" ${st('pop',3.4)}>Mature mRNA → leaves the nucleus</text>`}];
+  let animCur=0,timer=null;
+  const pills=document.getElementById('animPills');
+  steps.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className='pill';b.textContent=s.t;b.onclick=()=>{stopPlay();go(i)};pills.appendChild(b)});
+  function go(i){
+    animCur=(i+steps.length)%steps.length;const s=steps[animCur];
+    document.getElementById('stage').innerHTML='<title>'+s.t+'</title>'+s.s;
+    document.getElementById('animTtl').textContent=s.t;
+    document.getElementById('animCap').textContent=s.c;
+    [...pills.children].forEach((p,j)=>p.classList.toggle('on',j===animCur));
+  }
+  function stopPlay(){clearInterval(timer);timer=null;document.getElementById('aPlay').textContent='Play all'}
+  document.getElementById('aPrev').onclick=()=>{stopPlay();go(animCur-1)};
+  document.getElementById('aNext').onclick=()=>{stopPlay();go(animCur+1)};
+  document.getElementById('aReplay').onclick=()=>go(animCur);
+  document.getElementById('aPlay').onclick=e=>{
+    if(timer){stopPlay();return}
+    go(0);e.target.textContent='Pause';
+    timer=setInterval(()=>{if(animCur===steps.length-1){stopPlay();return}go(animCur+1)},5500);
+  };
+
+  const Q={
+  reading:{name:'Reading quiz (textbook page)',qs:[
+    ['Which enzyme joins RNA nucleotides together during transcription?',['DNA polymerase','RNA polymerase','Ribozyme','Ligase'],1,'RNA polymerase links the complementary RNA nucleotides into an RNA molecule.'],
+    ['If the DNA template strand reads TACGGA, what is the mRNA?',['ATGCCT','AUGCCU','UACGGA','TUCGGU'],1,'T→A, A→U, C→G, G→C. RNA uses U instead of T.'],
+    ['What is the DNA strand that is NOT copied called?',['Template strand','Inactive strand','Primary strand','Mature strand'],1,'Only the template strand is copied; the other is the inactive strand.'],
+    ['Which segments are removed during mRNA processing?',['Exons','Codons','Introns','Triplets'],2,'Introns are intragene segments that are removed. Exons are expressed.'],
+    ['What carries out mRNA splicing, and what is it made of?',['Ribozymes, made of protein','Ribozymes, made of RNA','RNA polymerase, made of RNA','Ribosomes, made of DNA'],1,'Ribozymes are organic catalysts composed of RNA, not protein.'],
+    ['Where does mRNA processing occur in eukaryotic cells?',['Cytoplasm','Ribosome','Nucleus','Cell membrane'],2,'Processing happens in the nucleus. The mature mRNA then moves to the cytoplasm.'],
+    ['How is primary mRNA different from mature mRNA?',['Primary has only exons; mature has introns','Primary has introns and exons; mature has only exons','Primary is DNA; mature is RNA','There is no difference'],1,'Primary mRNA is the new copy. After introns are removed, it is mature mRNA.'],
+    ['What is the result of alternative splicing?',['Introns stay in the mRNA','DNA is copied twice','Different mRNAs that make different but related proteins','mRNA stays in the nucleus'],2,'Joining only some exons produces different mRNAs and related proteins, especially during development.'],
+    ['Where does the mature mRNA go after leaving the nucleus?',['The nucleolus','The cytoplasm, to associate with ribosomes','Back into the DNA','The Golgi apparatus'],1,'Mature mRNA enters the cytoplasm and becomes associated with ribosomes.'],
+    ['mRNA codons are complementary to what?',['Amino acids','The DNA triplet code','tRNA only','Introns'],1,'After transcription, mRNA codons are complementary to the DNA triplets on the template strand.']]},
+  enzymes:{name:'Enzymes',qs:[
+    ['Which protein binds the TATA box to start transcription in eukaryotes?',['TFIID','Topoisomerase','Poly(A) polymerase','Rho factor'],0,'TFIID contains the TATA-binding protein and marks the start site.'],
+    ['In prokaryotes, what helps RNA polymerase find the promoter?',['TFIIH','Sigma factor','Exonuclease','Ribozyme'],1,'The sigma factor recognizes the promoter, then falls off once elongation starts.'],
+    ['Which enzyme relieves supercoiling ahead of RNA polymerase?',['Ligase','Topoisomerase','Primase','Endonuclease'],1,'Topoisomerase relieves the twisting tension in the DNA.'],
+    ['Which enzyme adds the poly-A tail?',['RNA polymerase','Capping enzyme','Poly(A) polymerase','Exonuclease'],2,'Poly(A) polymerase adds the A\u2019s to the 3\u2019 end without a template.'],
+    ['Which enzyme is NOT used in transcription?',['RNA polymerase','Topoisomerase','Primase','Endonuclease'],2,'RNA polymerase needs no primer, so primase is not used. It belongs to DNA replication.'],
+    ['What cuts the pre-mRNA after the AAUAAA signal?',['Endonuclease','Helicase','Ligase','Sigma factor'],0,'An endonuclease cuts the RNA, then an exonuclease helps knock Pol II off.']]},
+  dna:{name:'DNA basics',qs:[
+    ['Which base pair is held together by three hydrogen bonds?',['A–T','G–C','A–U','T–G'],1,'G–C forms three hydrogen bonds. A–T forms two.'],
+    ['If DNA is 30% adenine, what percentage is guanine?',['30%','70%','20%','40%'],2,'A = T = 30%, so A + T = 60%. The other 40% splits evenly: G = C = 20%.'],
+    ['What does antiparallel mean for the two DNA strands?',['They twist opposite ways','They run in opposite 5\u2019→3\u2019 directions','They have different sugars','They never pair'],1,'One strand runs 5\u2019→3\u2019 and its partner runs 3\u2019→5\u2019.'],
+    ['Which bond links nucleotides along the backbone?',['Hydrogen bond','Peptide bond','Phosphodiester bond','Ionic bond'],2,'Phosphodiester bonds form the backbone. Hydrogen bonds hold the strands together.'],
+    ['Which of these is a purine?',['Cytosine','Thymine','Uracil','Adenine'],3,'Purines (A, G) have two rings. Pyrimidines (C, T, U) have one.']]}};
+  const qf=document.getElementById('qfilter'),card=document.getElementById('qcard');
+  let set='reading',qi=0,score=0;
+  Object.entries(Q).forEach(([k,v])=>{const b=document.createElement('button');b.type='button';b.className='pill';b.dataset.k=k;b.textContent=v.name+' ('+v.qs.length+')';b.onclick=()=>{set=k;qi=0;score=0;renderQ()};qf.appendChild(b)});
+  function renderQ(){
+    [...qf.children].forEach(b=>b.classList.toggle('on',b.dataset.k===set));
+    const qs=Q[set].qs;
+    if(qi>=qs.length){
+      card.innerHTML=`<h3>Done</h3><p style="font-size:1.4rem;font-weight:700">${score} of ${qs.length} correct</p><p style="color:var(--muted)">${score===qs.length?'Perfect score.':'Review the explanations for the ones you missed, then try again.'}</p><button class="primary" type="button" id="qRestart">Restart quiz</button>`;
+      document.getElementById('qRestart').onclick=()=>{qi=0;score=0;renderQ()};return;
+    }
+    const [p,opts,ans,exp]=qs[qi];
+    card.innerHTML=`<div class="q-top"><span>Question ${qi+1} of ${qs.length}</span><span>Score ${score}</span></div><div class="bar"><div style="width:${qi/qs.length*100}%"></div></div><div class="q-prompt">${p}</div><div class="opts">${opts.map((o,i)=>`<button class="opt" type="button" data-i="${i}">${o}</button>`).join('')}</div><div id="fbArea"></div>`;
+    card.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      const pick=+b.dataset.i,ok=pick===ans;if(ok)score++;
+      card.querySelectorAll('.opt').forEach(x=>{x.disabled=true;const j=+x.dataset.i;if(j===ans)x.classList.add('right');else if(j===pick)x.classList.add('wrong')});
+      document.getElementById('fbArea').innerHTML=`<div class="fb"><b style="color:${ok?'var(--good)':'var(--bad)'}">${ok?'Correct.':'Not quite.'}</b>${exp}</div><div style="margin-top:1rem"><button class="primary" type="button" id="qNext">${qi===qs.length-1?'See score':'Next question'}</button></div>`;
+      document.getElementById('qNext').onclick=()=>{qi++;renderQ()};
+      document.getElementById('qNext').focus();
+    });
+  }
+  renderQ();
+
+  const start=sections.findIndex(s=>'#'+s.id===location.hash);
+  show(start>=0?start:0,true);
+})();
+</script>
+</body>
+</html>
