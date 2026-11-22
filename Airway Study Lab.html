@@ -125,7 +125,26 @@ th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mu
 #esoph{transition:all .6s ease}
 .smoker .cilia{opacity:0} .cilia{transition:opacity .4s}
 .extra{opacity:0;transition:opacity .4s} .smoker .extra{opacity:1}
+.jour .jp{transition:opacity .35s}
+.jour.live .jp:not(.hot){opacity:.38}
+#jMark{fill:none;stroke:var(--co2);stroke-width:2.5}
+#jRed{transition:none}
+.phase{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.25rem .55rem;border-radius:6px}
+.ph-in{background:var(--o2-soft);color:var(--o2)} .ph-ex{background:var(--co2-soft);color:var(--co2)} .ph-gas{background:var(--good-soft);color:var(--good)}
+.respchips .chip{border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:default}
+.respchips .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sdots{display:flex;gap:5px;flex-wrap:wrap}
+.sdots button{width:26px;height:10px;padding:0;border-radius:5px;border:0;background:var(--line)}
+.sdots button.done{background:var(--muted)} .sdots button.on{background:var(--co2)}
+.jlegend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
+#jTitle{margin-top:.3rem} #jText{margin:.2rem 0 .6rem;max-width:65ch}
+select{font:inherit;padding:.5rem;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
 @media (prefers-reduced-motion:no-preference){
+  #jMark{animation:pulse 1.2s ease-in-out infinite}
+  @keyframes pulse{50%{stroke-opacity:.25}}
+  .buzz{animation:vib .07s linear infinite alternate;--amp:1.6px}
+  .mucusdot{animation:upward 3s linear infinite}
+  @keyframes upward{from{transform:translateY(0);opacity:1}to{transform:translateY(-92px);opacity:.2}}
   .cilia line{transform-box:fill-box;transform-origin:50% 100%;animation:beat 1.1s ease-in-out infinite}
   .cilia line:nth-child(odd){animation-delay:.25s}
   @keyframes beat{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(22deg)}}
@@ -151,11 +170,82 @@ th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mu
   <div class="legend"><span><i class="dot" style="background:var(--o2)"></i>O₂-rich blood</span><span><i class="dot" style="background:var(--co2)"></i>O₂-poor blood</span></div>
 </header>
 <nav aria-label="Study modes"><div class="tabs">
-  <a href="#anatomy">Anatomy</a><a href="#how">How it works</a><a href="#cards">Flashcards</a><a href="#path">Path of air</a><a href="#knowledge">Knowledge quiz</a><a href="#apply">Application quiz</a><a href="#mixups">Mix-ups</a><a href="#cheat">Cheat sheet</a>
+  <a href="#journey">Air journey</a><a href="#anatomy">Anatomy</a><a href="#how">How it works</a><a href="#cards">Flashcards</a><a href="#path">Path of air</a><a href="#knowledge">Knowledge quiz</a><a href="#apply">Application quiz</a><a href="#mixups">Mix-ups</a><a href="#cheat">Cheat sheet</a>
 </div></nav>
 
 <main>
-<section id="v-anatomy">
+<section id="v-journey">
+  <div><h2>The journey of one breath</h2><p class="hint">Watch a breath travel in through the nose, reach the alveoli, swap gases with the blood, and travel back out. The highlighted part and the marker show where the air is; the caption explains what is happening there. Pause any time, or step through it.</p></div>
+  <div class="row">
+    <button id="jPrev" aria-label="Previous stage">◀ Back</button>
+    <button id="jPlay" class="primary">Pause</button>
+    <button id="jNext" aria-label="Next stage">Next ▶</button>
+    <button id="jRestart">Restart</button>
+    <label class="stat" for="jSpeed" style="margin-left:auto">Speed</label>
+    <select id="jSpeed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+  </div>
+  <div class="panel figwrap">
+  <svg id="jour" class="jour" viewBox="0 0 640 700" role="img" aria-labelledby="jT">
+    <title id="jT">Animated journey of air from the nostrils to the alveoli and back out</title>
+    <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--o2)"/></marker></defs>
+    <path class="skin" d="M268 300 C236 306 128 318 104 360 L94 640 L478 640 L468 360 C444 318 412 306 380 300 Z" opacity=".55"/>
+    <path class="skin" d="M330 36 C262 30 214 66 206 120 L190 150 Q186 160 196 163 L194 176 Q193 184 202 186 L198 200 Q200 214 214 218 Q226 224 246 226 L264 228 L268 300 L380 300 L384 250 C424 214 428 110 400 76 C382 52 358 38 330 36 Z" stroke="var(--muted)" stroke-width="1"/>
+    <path class="tisl" d="M214 194 Q250 184 290 190 L292 208 Q250 216 216 210 Z" opacity=".6"/>
+    <g class="jp" data-p="nasal"><path class="tis" d="M210 132 Q240 112 292 124 L294 152 Q250 162 212 156 Z"/></g>
+    <g class="jp" data-p="nostril"><ellipse cx="197" cy="166" rx="6" ry="4" fill="var(--tissue-dark)"/></g>
+    <g class="jp" data-p="pharynx"><rect class="tis" x="292" y="124" width="26" height="140" rx="10"/><line class="lnd" x1="292" y1="168" x2="318" y2="168"/><line class="lnd" x1="292" y1="212" x2="318" y2="212"/></g>
+    <g class="jp" data-p="esophagus"><rect class="food" x="306" y="262" width="16" height="118" rx="6"/></g>
+    <g class="jp" data-p="larynx"><polygon class="cart" points="270,262 302,262 298,298 272,298"/><polygon class="cart" points="270,266 261,276 271,286"/><line x1="274" y1="262" x2="298" y2="262" stroke="var(--ink)" stroke-width="3"/><line id="jVocal" x1="273" y1="280" x2="297" y2="280" stroke="var(--tissue-dark)" stroke-width="3"/></g>
+    <g class="jp" data-p="epiglottis"><path d="M270 262 Q262 244 278 232" stroke="var(--tissue-dark)" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+    <g id="jLungs" class="jp" data-p="lung"><path class="tisl" d="M240 360 C190 350 130 400 125 500 C122 560 140 600 175 605 L250 590 C262 520 262 420 240 360 Z"/><path class="tisl" d="M332 360 C382 350 442 400 447 500 C450 560 432 600 397 605 L322 590 C310 520 310 420 332 360 Z"/></g>
+    <g class="jp" data-p="trachea"><rect class="cart" x="274" y="298" width="24" height="104" rx="4"/><g stroke="var(--muted)" stroke-width="1.2"><line x1="274" y1="310" x2="298" y2="310"/><line x1="274" y1="322" x2="298" y2="322"/><line x1="274" y1="334" x2="298" y2="334"/><line x1="274" y1="346" x2="298" y2="346"/><line x1="274" y1="358" x2="298" y2="358"/><line x1="274" y1="370" x2="298" y2="370"/><line x1="274" y1="382" x2="298" y2="382"/><line x1="274" y1="394" x2="298" y2="394"/></g></g>
+    <g class="jp" data-p="bronchi"><path d="M286 400 L222 440 L192 470 M286 400 L350 440 L380 470" stroke="var(--cart)" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M286 400 L222 440 L192 470 M286 400 L350 440 L380 470" stroke="var(--muted)" stroke-width="1" fill="none"/></g>
+    <g class="jp" data-p="bronchioles"><path d="M192 470 L162 520 M192 470 L202 530 M180 492 L172 560 M380 470 L410 520 M380 470 L370 530 M392 492 L400 560" stroke="var(--muted)" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+    <g class="jp" data-p="alveoli"><g class="tis"><circle cx="160" cy="524" r="6"/><circle cx="168" cy="530" r="5"/><circle cx="202" cy="534" r="6"/><circle cx="172" cy="564" r="6"/><circle cx="180" cy="566" r="5"/><circle cx="412" cy="524" r="6"/><circle cx="404" cy="530" r="5"/><circle cx="370" cy="534" r="6"/><circle cx="400" cy="564" r="6"/><circle cx="392" cy="566" r="5"/></g></g>
+    <g id="jDia" class="jp" data-p="diaphragm"><path d="M110 620 Q286 560 462 620 L462 634 Q286 576 110 634 Z" fill="var(--tissue-dark)" opacity=".7"/></g>
+    <g fill="var(--mucus)" stroke="var(--muted)" stroke-width=".6"><circle class="mucusdot" cx="279" cy="396" r="2.6"/><circle class="mucusdot" cx="279" cy="396" r="2.6" style="animation-delay:-1s"/><circle class="mucusdot" cx="279" cy="396" r="2.6" style="animation-delay:-2s"/></g>
+    <path id="pL" d="M140 168 L197 166 Q215 150 235 145 L285 140 Q305 140 305 160 L305 240 Q305 255 288 262 L286 300 L286 400 L222 440 L192 470 L170 515" fill="none" stroke="var(--o2)" stroke-opacity=".14" stroke-width="2"/>
+    <path id="pR" d="M140 168 L197 166 Q215 150 235 145 L285 140 Q305 140 305 160 L305 240 Q305 255 288 262 L286 300 L286 400 L350 440 L380 470 L402 515" fill="none" stroke="var(--o2)" stroke-opacity=".14" stroke-width="2"/>
+    <g id="jDrops" opacity="0" fill="var(--co2)"><circle cx="190" cy="182" r="2.6"/><circle cx="195" cy="194" r="2.2"/><circle cx="187" cy="204" r="2.6"/></g>
+    <g id="jParts"></g>
+    <g id="jInset">
+      <line class="ln" x1="408" y1="522" x2="480" y2="536"/>
+      <circle cx="548" cy="540" r="70" fill="var(--surface)" stroke="var(--muted)"/>
+      <circle cx="540" cy="526" r="36" class="airf"/>
+      <path id="jCapB" d="M486 592 Q522 604 560 580 Q598 556 606 500" stroke="var(--co2)" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <path id="jRed" d="M486 592 Q522 604 560 580 Q598 556 606 500" stroke="var(--o2)" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <text class="svgs" x="540" y="506" text-anchor="middle">alveolus</text>
+      <g id="jGas"></g>
+      <text class="svgs" x="548" y="628" text-anchor="middle">Zoom: alveolus + capillary</text>
+    </g>
+    <g id="jBody" opacity="0"><path d="M606 494 L606 462" stroke="var(--o2)" stroke-width="2.5" marker-end="url(#ar2)"/><text class="svgo2" x="632" y="448" text-anchor="end">To the heart, then body tissues</text></g>
+    <circle id="jMark" cx="197" cy="166" r="14"/>
+    <g class="svgt">
+      <text x="150" y="132" text-anchor="end">Nasal cavity</text><line class="ln" x1="154" y1="128" x2="226" y2="138"/>
+      <text x="150" y="166" text-anchor="end">Nostril</text><line class="ln" x1="154" y1="162" x2="190" y2="166"/>
+      <text x="150" y="240" text-anchor="end">Epiglottis</text><line class="ln" x1="154" y1="236" x2="266" y2="240"/>
+      <text x="150" y="280" text-anchor="end">Larynx</text><line class="ln" x1="154" y1="276" x2="262" y2="277"/>
+      <text x="150" y="338" text-anchor="end">Trachea</text><line class="ln" x1="154" y1="334" x2="274" y2="334"/>
+      <text x="112" y="416" text-anchor="end">Bronchus</text><line class="ln" x1="116" y1="412" x2="250" y2="423"/>
+      <text x="112" y="464" text-anchor="end">Lung</text><line class="ln" x1="116" y1="460" x2="160" y2="460"/>
+      <text x="112" y="512" text-anchor="end">Bronchiole</text><line class="ln" x1="116" y1="508" x2="170" y2="506"/>
+      <text x="112" y="666" text-anchor="end">Diaphragm</text><line class="ln" x1="116" y1="662" x2="140" y2="628"/>
+      <text x="450" y="194">Pharynx</text><line class="ln" x1="446" y1="190" x2="318" y2="190"/>
+      <text x="450" y="334">Esophagus</text><line class="ln" x1="446" y1="330" x2="322" y2="330"/>
+    </g>
+  </svg>
+  </div>
+  <div class="jlegend"><span><i class="dot" style="background:var(--o2)"></i>O₂ / O₂-rich air</span><span><i class="dot" style="background:var(--co2)"></i>CO₂ / CO₂-rich air</span><span><i class="dot" style="background:var(--ink)"></i>Dust trapped at the nose</span><span><i class="dot" style="background:var(--mucus)"></i>Mucus swept up by cilia</span></div>
+  <div class="panel" aria-live="polite">
+    <div class="row" style="justify-content:space-between"><span id="jPhase" class="phase ph-in">Inhale</span><span class="stat" id="jCount"></span></div>
+    <h2 id="jTitle"></h2>
+    <p id="jText"></p>
+    <div class="row respchips" id="jResp"><span class="chip">1 Breathing</span><span class="chip">2 External</span><span class="chip">3 Internal</span><span class="chip">4 Cellular</span></div>
+    <div class="sdots" id="jDots" style="margin-top:.8rem"></div>
+  </div>
+</section>
+
+<section id="v-anatomy" hidden>
   <div><h2>Anatomy of the respiratory tract</h2><p class="hint">Tap any label or part to see its function. Turn on quiz mode to hide the names and test yourself. The head is drawn from the side (front of the face on the left); the chest is drawn from the front.</p></div>
   <div class="row"><button id="hideBtn" class="chip" aria-pressed="false">Quiz mode: hide labels</button><button id="clearBtn" class="chip">Show everything</button></div>
   <div class="panel figwrap">
@@ -172,9 +262,12 @@ th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mu
       <line class="lnd" x1="292" y1="168" x2="318" y2="168"/><line class="lnd" x1="292" y1="212" x2="318" y2="212"/></g>
     <g class="part" data-k="auditory"><path d="M318 140 L352 124" stroke="var(--tissue-dark)" stroke-width="3" fill="none"/><circle cx="357" cy="122" r="6" class="tisl"/></g>
     <g class="part" data-k="esophagus"><rect class="food" x="306" y="262" width="16" height="118" rx="6"/></g>
-    <g class="part" data-k="larynx"><polygon class="cart" points="270,262 302,262 298,298 272,298"/><polygon class="cart" points="270,266 261,276 271,286"/></g>
+    <g class="part" data-k="larynx"><polygon class="cart" points="270,262 302,262 298,298 272,298"/></g>
+    <g class="part" data-k="adam"><polygon class="cart" points="270,266 261,276 271,286"/></g>
     <g class="part" data-k="glottis"><line x1="274" y1="262" x2="298" y2="262" stroke="var(--ink)" stroke-width="3"/></g>
     <g class="part" data-k="vocal"><line x1="273" y1="280" x2="297" y2="280" stroke="var(--tissue-dark)" stroke-width="3"/></g>
+    <g class="part" data-k="softpalate"><path d="M270 168 Q284 170 293 180" stroke="var(--tissue-dark)" stroke-width="4" fill="none" stroke-linecap="round"/></g>
+    <g class="part" data-k="tonsils"><ellipse cx="288" cy="206" rx="5" ry="8" fill="var(--tissue-dark)" opacity=".85"/></g>
     <g class="part" data-k="epiglottis"><path d="M270 262 Q262 244 278 232" stroke="var(--tissue-dark)" stroke-width="5" fill="none" stroke-linecap="round"/></g>
     <g class="part" data-k="lung"><path class="tisl" d="M240 360 C190 350 130 400 125 500 C122 560 140 600 175 605 L250 590 C262 520 262 420 240 360 Z"/><path class="tisl" d="M332 360 C382 350 442 400 447 500 C450 560 432 600 397 605 L322 590 C310 520 310 420 332 360 Z"/></g>
     <g class="part" data-k="trachea"><rect class="cart" x="274" y="298" width="24" height="104" rx="4"/>
@@ -194,7 +287,10 @@ th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mu
         <path d="M548 530 Q582 548 586 590 Q590 606 612 612" stroke="var(--o2)" stroke-width="4" fill="none"/>
         <path d="M500 560 Q520 590 548 588" stroke="var(--co2)" stroke-width="2" fill="none"/>
       </g>
-      <text class="svgs" x="548" y="624" text-anchor="middle">alveoli and capillaries</text></g>
+      </g>
+    <g class="lbl" data-k="capillaries"><text class="svgt" x="548" y="626" text-anchor="middle" data-name="Capillary network">Capillary network</text></g>
+    <g class="lbl" data-k="arteriole"><text class="svgco2" x="630" y="650" text-anchor="end" data-name="Blue: pulmonary arteriole">Blue: pulmonary arteriole</text></g>
+    <g class="lbl" data-k="venule"><text class="svgo2" x="630" y="670" text-anchor="end" data-name="Red: pulmonary venule">Red: pulmonary venule</text></g>
     <g class="part" data-k="diaphragm"><path d="M110 620 Q286 560 462 620 L462 634 Q286 576 110 634 Z" fill="var(--tissue-dark)" opacity=".7"/></g>
 
     <g class="lbl" data-k="sinus"><line class="ln" x1="154" y1="96" x2="232" y2="102"/><text class="svgt" x="150" y="100" text-anchor="end" data-name="Sinus">Sinus</text></g>
@@ -202,7 +298,8 @@ th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mu
     <g class="lbl" data-k="nostril"><line class="ln" x1="154" y1="162" x2="192" y2="166"/><text class="svgt" x="150" y="166" text-anchor="end" data-name="Nostril">Nostril</text></g>
     <g class="lbl" data-k="oral"><line class="ln" x1="154" y1="200" x2="222" y2="201"/><text class="svgt" x="150" y="204" text-anchor="end" data-name="Oral cavity">Oral cavity</text></g>
     <g class="lbl" data-k="epiglottis"><line class="ln" x1="154" y1="236" x2="266" y2="240"/><text class="svgt" x="150" y="240" text-anchor="end" data-name="Epiglottis">Epiglottis</text></g>
-    <g class="lbl" data-k="larynx"><line class="ln" x1="154" y1="276" x2="262" y2="277"/><text class="svgt" x="150" y="280" text-anchor="end" data-name="Larynx">Larynx</text></g>
+    <g class="lbl" data-k="larynx"><line class="ln" x1="154" y1="264" x2="276" y2="272"/><text class="svgt" x="150" y="268" text-anchor="end" data-name="Larynx">Larynx</text></g>
+    <g class="lbl" data-k="adam"><line class="ln" x1="154" y1="294" x2="262" y2="278"/><text class="svgt" x="150" y="298" text-anchor="end" data-name="Adam's apple">Adam's apple</text></g>
     <g class="lbl" data-k="trachea"><line class="ln" x1="154" y1="334" x2="274" y2="334"/><text class="svgt" x="150" y="338" text-anchor="end" data-name="Trachea">Trachea</text></g>
     <g class="lbl" data-k="bronchus"><line class="ln" x1="116" y1="412" x2="250" y2="423"/><text class="svgt" x="112" y="416" text-anchor="end" data-name="Bronchus">Bronchus</text></g>
     <g class="lbl" data-k="lung"><line class="ln" x1="116" y1="460" x2="160" y2="460"/><text class="svgt" x="112" y="464" text-anchor="end" data-name="Lung">Lung</text></g>
@@ -212,13 +309,95 @@ th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mu
     <g class="lbl" data-k="pharynx"><line class="ln" x1="446" y1="146" x2="318" y2="146"/><text class="svgt" x="450" y="150" data-name="Nasopharynx">Nasopharynx</text>
       <line class="ln" x1="446" y1="190" x2="318" y2="190"/><text class="svgt" x="450" y="194" data-name="Oropharynx">Oropharynx</text>
       <line class="ln" x1="446" y1="236" x2="318" y2="238"/><text class="svgt" x="450" y="240" data-name="Laryngopharynx">Laryngopharynx</text></g>
+    <g class="lbl" data-k="softpalate"><line class="ln" x1="446" y1="168" x2="292" y2="178"/><text class="svgt" x="450" y="172" data-name="Soft palate">Soft palate</text></g>
+    <g class="lbl" data-k="tonsils"><line class="ln" x1="446" y1="212" x2="293" y2="207"/><text class="svgt" x="450" y="216" data-name="Tonsils">Tonsils</text></g>
     <g class="lbl" data-k="glottis"><line class="ln" x1="446" y1="262" x2="300" y2="262"/><text class="svgt" x="450" y="266" data-name="Glottis">Glottis</text></g>
     <g class="lbl" data-k="vocal"><line class="ln" x1="446" y1="290" x2="298" y2="281"/><text class="svgt" x="450" y="294" data-name="Vocal cords">Vocal cords</text></g>
     <g class="lbl" data-k="esophagus"><line class="ln" x1="446" y1="330" x2="322" y2="330"/><text class="svgt" x="450" y="334" data-name="Esophagus">Esophagus</text></g>
     <g class="lbl" data-k="alveoli"><line class="ln" x1="548" y1="440" x2="548" y2="474"/><text class="svgt" x="548" y="434" text-anchor="middle" data-name="Alveoli">Alveoli</text></g>
   </svg>
   </div>
-  <div class="panel info" id="anatInfo" aria-live="polite"></div>
+  <div class="panel info anatInfo" id="anatInfo" aria-live="polite"></div>
+  <div><h2>Close-up: nose, mouth and throat</h2><p class="hint">Matches Figure 15.2. The inset shows the nose from the front, because the septum is the wall you look straight at in a side view.</p></div>
+  <div class="panel figwrap">
+  <svg class="anat" viewBox="0 0 640 490" role="img" aria-labelledby="anat2T">
+    <title id="anat2T">Close-up of the nose, mouth, pharynx and larynx with a front view of the nasal septum</title>
+    <path class="skin" d="M360 30 C250 20 175 80 165 170 L140 222 Q134 236 152 240 L148 262 Q146 274 160 276 L154 298 Q156 318 178 324 Q196 332 228 334 L256 336 L262 470 L420 470 L426 380 C480 330 486 160 448 104 C424 66 396 34 360 30 Z" stroke="var(--muted)" stroke-width="1"/>
+    <ellipse cx="210" cy="148" rx="15" ry="7" fill="var(--surface)" stroke="var(--muted)"/>
+    <g class="part" data-k="sinus"><ellipse class="tisl" cx="256" cy="116" rx="30" ry="12"/><ellipse class="tisl" cx="318" cy="160" rx="14" ry="9"/></g>
+    <g class="part" data-k="lacrimal"><ellipse class="tisl" cx="226" cy="138" rx="7" ry="4"/><path d="M200 154 Q194 176 200 200" stroke="var(--tissue-dark)" stroke-width="2" stroke-dasharray="4 3" fill="none"/></g>
+    <g class="part" data-k="nasal"><path class="tis" d="M172 208 Q230 176 334 186 L338 238 Q262 250 178 240 Z"/></g>
+    <g class="part" data-k="odor"><g fill="var(--co2)"><circle cx="240" cy="192" r="3.5"/><circle cx="258" cy="190" r="3.5"/><circle cx="276" cy="190" r="3.5"/><circle cx="294" cy="192" r="3.5"/></g></g>
+    <g class="part" data-k="nostril"><ellipse cx="152" cy="247" rx="7" ry="4" fill="var(--tissue-dark)"/></g>
+    <g class="part" data-k="oral"><path class="tisl" d="M182 262 Q240 256 300 260 L318 282 Q250 290 186 284 Z"/></g>
+    <g class="part" data-k="tongue"><path class="tis" d="M196 300 Q240 280 300 288 Q326 298 324 330 L208 332 Q192 320 196 300 Z"/></g>
+    <g class="part" data-k="hardpalate"><path d="M176 251 L300 255" stroke="var(--cart)" stroke-width="8" stroke-linecap="round"/><path d="M176 251 L300 255" stroke="var(--muted)" stroke-width="1"/></g>
+    <g class="part" data-k="pharynx"><rect class="tis" x="340" y="180" width="32" height="222" rx="12"/><line class="lnd" x1="340" y1="258" x2="372" y2="258"/><line class="lnd" x1="340" y1="320" x2="372" y2="320"/></g>
+    <g class="part" data-k="softpalate"><path d="M300 255 Q326 257 338 268" stroke="var(--tissue-dark)" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+    <g class="part" data-k="uvula"><ellipse cx="341" cy="277" rx="4" ry="8" fill="var(--tissue-dark)"/></g>
+    <g class="part" data-k="tonsils"><ellipse cx="334" cy="298" rx="5" ry="9" fill="var(--tissue-dark)" opacity=".85"/></g>
+    <g class="part" data-k="auditory"><ellipse cx="366" cy="212" rx="4" ry="7" fill="var(--ink)" opacity=".7"/></g>
+    <g class="part" data-k="esophagus"><rect class="food" x="350" y="400" width="22" height="70" rx="6"/></g>
+    <g class="part" data-k="larynx"><polygon class="cart" points="304,352 344,352 340,410 308,410"/></g>
+    <g class="part" data-k="adam"><polygon class="cart" points="304,358 292,372 305,386"/></g>
+    <g class="part" data-k="glottis"><line x1="308" y1="352" x2="340" y2="352" stroke="var(--ink)" stroke-width="3"/></g>
+    <g class="part" data-k="vocal"><line x1="308" y1="382" x2="340" y2="382" stroke="var(--tissue-dark)" stroke-width="3"/></g>
+    <g class="part" data-k="epiglottis"><path d="M304 352 Q296 330 314 316" stroke="var(--tissue-dark)" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+    <g class="part" data-k="trachea"><rect class="cart" x="308" y="410" width="32" height="60" rx="4"/><g stroke="var(--muted)" stroke-width="1.2"><line x1="308" y1="422" x2="340" y2="422"/><line x1="308" y1="434" x2="340" y2="434"/><line x1="308" y1="446" x2="340" y2="446"/><line x1="308" y1="458" x2="340" y2="458"/></g></g>
+    <g class="part" data-k="septum"><circle cx="560" cy="96" r="54" fill="var(--surface)" stroke="var(--muted)"/><path class="skin" d="M560 56 L530 128 Q560 140 590 128 Z" stroke="var(--muted)"/><path class="tis" d="M555 72 L540 122 L555 124 Z"/><path class="tis" d="M565 72 L580 122 L565 124 Z"/><rect x="556" y="64" width="8" height="62" class="cart"/><ellipse cx="546" cy="128" rx="6" ry="3" fill="var(--tissue-dark)"/><ellipse cx="574" cy="128" rx="6" ry="3" fill="var(--tissue-dark)"/></g>
+
+    <g class="lbl" data-k="septum"><line class="ln" x1="560" y1="156" x2="560" y2="130"/><text class="svgt" x="560" y="170" text-anchor="middle" data-name="Nasal septum">Nasal septum</text></g>
+    <text class="svgs" x="560" y="186" text-anchor="middle">front view of the nose</text>
+    <g class="lbl" data-k="sinus"><line class="ln" x1="132" y1="112" x2="226" y2="116"/><text class="svgt" x="128" y="116" text-anchor="end" data-name="Sinus">Sinus</text></g>
+    <g class="lbl" data-k="lacrimal"><line class="ln" x1="132" y1="142" x2="198" y2="176"/><text class="svgt" x="128" y="146" text-anchor="end" data-name="Tear duct">Tear duct</text></g>
+    <g class="lbl" data-k="odor"><line class="ln" x1="132" y1="174" x2="238" y2="190"/><text class="svgt" x="128" y="178" text-anchor="end" data-name="Odor receptors">Odor receptors</text></g>
+    <g class="lbl" data-k="nasal"><line class="ln" x1="132" y1="204" x2="196" y2="216"/><text class="svgt" x="128" y="208" text-anchor="end" data-name="Nasal cavity">Nasal cavity</text></g>
+    <g class="lbl" data-k="nostril"><line class="ln" x1="132" y1="240" x2="146" y2="246"/><text class="svgt" x="128" y="244" text-anchor="end" data-name="Nostril">Nostril</text></g>
+    <g class="lbl" data-k="hardpalate"><line class="ln" x1="132" y1="266" x2="200" y2="253"/><text class="svgt" x="128" y="270" text-anchor="end" data-name="Hard palate">Hard palate</text></g>
+    <g class="lbl" data-k="oral"><line class="ln" x1="132" y1="290" x2="200" y2="272"/><text class="svgt" x="128" y="294" text-anchor="end" data-name="Oral cavity">Oral cavity</text></g>
+    <g class="lbl" data-k="tongue"><line class="ln" x1="132" y1="316" x2="226" y2="306"/><text class="svgt" x="128" y="320" text-anchor="end" data-name="Tongue">Tongue</text></g>
+    <g class="lbl" data-k="epiglottis"><line class="ln" x1="132" y1="342" x2="300" y2="336"/><text class="svgt" x="128" y="346" text-anchor="end" data-name="Epiglottis">Epiglottis</text></g>
+    <g class="lbl" data-k="larynx"><line class="ln" x1="132" y1="368" x2="312" y2="372"/><text class="svgt" x="128" y="372" text-anchor="end" data-name="Larynx">Larynx</text></g>
+    <g class="lbl" data-k="adam"><line class="ln" x1="132" y1="394" x2="294" y2="376"/><text class="svgt" x="128" y="398" text-anchor="end" data-name="Adam's apple">Adam's apple</text></g>
+    <g class="lbl" data-k="trachea"><line class="ln" x1="132" y1="446" x2="308" y2="446"/><text class="svgt" x="128" y="450" text-anchor="end" data-name="Trachea">Trachea</text></g>
+    <g class="lbl" data-k="auditory"><line class="ln" x1="484" y1="208" x2="370" y2="212"/><text class="svgt" x="488" y="212" data-name="Auditory tube opening">Auditory tube opening</text></g>
+    <g class="lbl" data-k="pharynx"><line class="ln" x1="484" y1="234" x2="372" y2="234"/><text class="svgt" x="488" y="238" data-name="Nasopharynx">Nasopharynx</text>
+      <line class="ln" x1="484" y1="312" x2="372" y2="300"/><text class="svgt" x="488" y="316" data-name="Oropharynx">Oropharynx</text>
+      <line class="ln" x1="484" y1="346" x2="372" y2="360"/><text class="svgt" x="488" y="350" data-name="Laryngopharynx">Laryngopharynx</text></g>
+    <g class="lbl" data-k="uvula"><line class="ln" x1="484" y1="260" x2="346" y2="278"/><text class="svgt" x="488" y="264" data-name="Uvula">Uvula</text></g>
+    <g class="lbl" data-k="tonsils"><line class="ln" x1="484" y1="286" x2="340" y2="298"/><text class="svgt" x="488" y="290" data-name="Tonsils">Tonsils</text></g>
+    <g class="lbl" data-k="glottis"><line class="ln" x1="484" y1="376" x2="340" y2="353"/><text class="svgt" x="488" y="380" data-name="Glottis">Glottis</text></g>
+    <g class="lbl" data-k="vocal"><line class="ln" x1="484" y1="404" x2="340" y2="383"/><text class="svgt" x="488" y="408" data-name="Vocal cords">Vocal cords</text></g>
+    <g class="lbl" data-k="esophagus"><line class="ln" x1="484" y1="444" x2="372" y2="444"/><text class="svgt" x="488" y="448" data-name="Esophagus">Esophagus</text></g>
+  </svg>
+  </div>
+  <div class="panel info anatInfo" aria-live="polite"></div>
+  <div><h2>Nasal septum: bone and cartilage</h2><p class="hint">The septum is the wall between the two nasal cavities. Here the head is cut down the middle so you look straight at it. For the test you need one fact: the septum is made of bone and cartilage. The names of the bones are extra detail.</p></div>
+  <div class="panel figwrap">
+  <svg class="anat" viewBox="0 0 640 470" role="img" aria-labelledby="septT">
+    <title id="septT">Nasal septum seen from the side, showing the septal cartilage in front and bone behind, with a front view inset</title>
+    <rect x="40" y="20" width="18" height="14" rx="3" fill="var(--food)" stroke="var(--muted)"/><text class="svgt" x="66" y="32">Bone</text>
+    <rect x="120" y="20" width="18" height="14" rx="3" fill="var(--cart)" stroke="var(--co2)"/><text class="svgt" x="146" y="32">Cartilage</text>
+    <path class="skin" d="M340 40 C300 40 276 70 268 98 L246 128 L190 208 Q174 232 188 246 L208 262 L214 300 Q220 330 250 344 L420 344 L420 40 Z" opacity=".55"/>
+    <path d="M340 40 C300 40 276 70 268 98 L246 128 L190 208 Q174 232 188 246 L208 262 L214 300 Q220 330 250 344" stroke="var(--muted)" fill="none"/>
+    <line x1="420" y1="40" x2="420" y2="344" class="lnd"/>
+    <g class="part" data-k="nasalbone"><polygon points="268,98 246,128 262,136 282,106" fill="var(--food)" stroke="var(--muted)" stroke-width="1.2"/></g>
+    <g class="part" data-k="ethmoid"><polygon points="282,106 262,136 300,200 366,188 372,104" fill="var(--food)" stroke="var(--muted)" stroke-width="1.2"/></g>
+    <g class="part" data-k="vomer"><polygon points="300,200 366,188 398,256 312,262" fill="var(--food)" stroke="var(--muted)" stroke-width="1.2"/></g>
+    <g class="part" data-k="septcart"><polygon points="246,128 262,136 300,200 312,262 216,258 194,236" fill="var(--cart)" stroke="var(--co2)" stroke-width="1.6"/></g>
+    <g class="part" data-k="hardpalate"><path d="M214 266 L410 266 L410 278 L218 278 Z" fill="var(--food)" stroke="var(--muted)" stroke-width="1.2"/></g>
+    <g class="lbl" data-k="nasalbone"><line class="ln" x1="154" y1="106" x2="262" y2="116"/><text class="svgt" x="150" y="110" text-anchor="end" data-name="Nasal bone">Nasal bone</text></g>
+    <g class="lbl" data-k="septcart"><line class="ln" x1="154" y1="196" x2="244" y2="200"/><text class="svgt" x="150" y="200" text-anchor="end" data-name="Septal cartilage">Septal cartilage</text></g>
+    <g class="lbl" data-k="ethmoid"><line class="ln" x1="436" y1="146" x2="330" y2="150"/><text class="svgt" x="440" y="150" data-name="Ethmoid bone">Ethmoid bone</text><text class="svgs" x="440" y="166">(perpendicular plate)</text></g>
+    <g class="lbl" data-k="vomer"><line class="ln" x1="436" y1="226" x2="352" y2="228"/><text class="svgt" x="440" y="230" data-name="Vomer">Vomer</text><text class="svgs" x="440" y="246">(bone)</text></g>
+    <g class="lbl" data-k="hardpalate"><line class="ln" x1="436" y1="290" x2="392" y2="276"/><text class="svgt" x="440" y="294" data-name="Hard palate">Hard palate</text><text class="svgs" x="440" y="310">(bone, floor of the nasal cavity)</text></g>
+    <g class="part" data-k="septum"><circle cx="200" cy="406" r="52" fill="var(--surface)" stroke="var(--muted)"/><path class="skin" d="M200 364 L170 432 Q200 444 230 432 Z" stroke="var(--muted)"/><path class="tis" d="M195 378 L180 428 L195 430 Z"/><path class="tis" d="M205 378 L220 428 L205 430 Z"/><rect x="196" y="370" width="8" height="30" fill="var(--food)" stroke="var(--muted)"/><rect x="196" y="400" width="8" height="32" fill="var(--cart)" stroke="var(--co2)"/><ellipse cx="186" cy="434" rx="6" ry="3" fill="var(--tissue-dark)"/><ellipse cx="214" cy="434" rx="6" ry="3" fill="var(--tissue-dark)"/></g>
+    <g class="lbl" data-k="septum"><text class="svgt" x="270" y="392" data-name="Front view of the septum">Front view of the septum</text></g>
+    <text class="svgs" x="270" y="410">Divides the nose into two nasal cavities.</text>
+    <text class="svgs" x="270" y="426">Upper, back part: bone. Lower, front part: cartilage.</text>
+  </svg>
+  </div>
+  <div class="panel info anatInfo" aria-live="polite"></div>
 </section>
 
 <section id="v-how" hidden>
@@ -380,7 +559,7 @@ th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mu
   <div class="panel" id="pathDone" hidden>
     <h2>Now split it</h2>
     <p class="hint">Upper respiratory tract ends at the larynx. Lower respiratory tract starts at the trachea.</p>
-    <div class="tablewrap"><table><thead><tr><th>Structure</th><th>Tract</th><th>Function</th></tr></thead><tbody id="pathTable"></tbody></table></div>
+    <div class="tablewrap"><table><thead><tr><th>Structure</th><th>Tract</th><th>Description</th><th>Function</th></tr></thead><tbody id="pathTable"></tbody></table></div>
   </div>
 </section>
 
@@ -401,6 +580,18 @@ th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mu
 
 <section id="v-cheat" hidden>
   <div><h2>Cheat sheet</h2><p class="hint">Use this to check, not to study first. Cover the right column and test yourself.</p></div>
+  <div class="panel"><h2>Path of air (Table 15.1)</h2>
+  <div class="tablewrap"><table><thead><tr><th>Structure</th><th>Tract</th><th>Description</th><th>Function</th></tr></thead><tbody>
+    <tr><td><b>Nasal cavities</b></td><td><span class="region up">Upper</span></td><td>Hollow spaces in the nose</td><td>Filter, warm and moisten air</td></tr>
+    <tr><td><b>Pharynx</b></td><td><span class="region up">Upper</span></td><td>Chamber behind the oral cavity, between the nasal cavity and larynx</td><td>Connection to surrounding regions</td></tr>
+    <tr><td><b>Glottis</b></td><td><span class="region up">Upper</span></td><td>Opening into the larynx</td><td>Passage of air into the larynx</td></tr>
+    <tr><td><b>Larynx</b></td><td><span class="region up">Upper</span></td><td>Cartilaginous organ that contains the vocal cords; voice box</td><td>Sound production</td></tr>
+    <tr><td><b>Trachea</b></td><td><span class="region low">Lower</span></td><td>Flexible tube that connects the larynx with the bronchi; windpipe</td><td>Passage of air to the bronchi</td></tr>
+    <tr><td><b>Bronchi</b></td><td><span class="region low">Lower</span></td><td>Divisions of the trachea that enter the lungs</td><td>Passage of air to the lungs</td></tr>
+    <tr><td><b>Bronchioles</b></td><td><span class="region low">Lower</span></td><td>Branched tubes that lead from the bronchi to the alveoli</td><td>Passage of air to each alveolus</td></tr>
+    <tr><td><b>Lungs</b></td><td><span class="region low">Lower</span></td><td>Soft, cone-shaped organs that occupy a large portion of the thoracic cavity</td><td>Gas exchange</td></tr>
+  </tbody></table></div>
+  <p class="hint">Singular and plural: bronchus → bronchi, alveolus → alveoli.</p></div>
   <div class="panel"><h2>The 4 parts of respiration</h2>
   <div class="tablewrap"><table><thead><tr><th>Part</th><th>What happens</th><th>Where</th></tr></thead><tbody>
     <tr><td>1. Breathing</td><td>Air moves into and out of the lungs</td><td>Airways, lungs</td></tr>
@@ -423,7 +614,22 @@ th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mu
     <tr><td>Epiglottis, pharynx</td><td>Shared with the digestive system</td></tr>
     <tr><td>Tonsils</td><td>Lymphatic and immune systems, B and T cells</td></tr>
     <tr><td>Why we need O₂</td><td>Cellular respiration makes ATP</td></tr>
+    <tr><td>Mucus in the airways</td><td>Mucous membranes from the body membranes section</td></tr>
+    <tr><td>Blood carries the gases</td><td>Cardiovascular system</td></tr>
   </tbody></table></div></div>
+  <div class="panel"><h2>10 mix-ups to watch for</h2>
+  <ol class="missed">
+    <li><b>Glottis vs epiglottis:</b> the glottis is the opening; the epiglottis is the flap that covers it.</li>
+    <li><b>Pharynx vs larynx:</b> the pharynx is the throat, shared by air and food; the larynx is the voice box, for air only.</li>
+    <li><b>Trachea vs esophagus:</b> the trachea carries air and sits in front; the esophagus carries food and sits behind.</li>
+    <li><b>External vs internal respiration:</b> external is lungs (air ↔ blood); internal is tissues (blood ↔ tissue fluid).</li>
+    <li><b>Respiration vs breathing:</b> breathing is only 1 of the 4 parts.</li>
+    <li><b>Pitch vs loudness:</b> pitch depends on tension; loudness on amplitude.</li>
+    <li><b>Pulmonary arteriole vs venule:</b> the arteriole carries O₂-poor blood (blue); the venule carries O₂-rich blood (red).</li>
+    <li><b>Direction of the cilia:</b> upward, toward the pharynx, not down into the lungs.</li>
+    <li><b>C-rings:</b> the open side faces the esophagus, at the back.</li>
+    <li><b>Smell:</b> interpreted in the brain; the nose only has the receptors.</li>
+  </ol></div>
 </section>
 </main>
 </div>
@@ -455,13 +661,13 @@ const CARDS=[
  {t:"Larynx",n:"Larynx",f:"Cartilaginous, box-like passageway for air between the pharynx and trachea; the voice box.",x:"Shaped like a triangular box. Contains the vocal cords."},
  {t:"Larynx",n:"Adam's apple",f:"The apex (tip) of the triangular larynx, at the front of the neck.",x:"Larger in males because the larynx grows more at puberty."},
  {t:"Larynx",n:"Glottis",f:"Variable-sized opening at the top of the larynx.",x:"The hole. Narrow glottis = high pitch; wide glottis = low pitch."},
- {t:"Larynx",n:"Epiglottis",f:"Flap of tissue that covers the glottis when you swallow, keeping food out of the larynx.",x:"The lid. During swallowing, the larynx moves up against the epiglottis."},
+ {t:"Larynx",n:"Epiglottis",f:"Flap of tissue that covers the glottis when you swallow, keeping food out of the larynx.",x:"The lid. During swallowing, the larynx moves up against the epiglottis. Feel it: put your hand gently on your larynx and swallow."},
  {t:"Larynx",n:"Vocal cords",f:"Mucosal folds supported by elastic ligaments, stretched across the glottis. They vibrate to make sound.",x:"Air passing through the glottis makes them vibrate."},
  {t:"Larynx",n:"Pitch",f:"How high or low the voice is. Controlled by tension on the vocal cords.",x:"More tension and a narrower glottis = higher pitch. Wider glottis = lower pitch."},
  {t:"Larynx",n:"Loudness",f:"Intensity of the voice. Controlled by the amplitude of the vibrations.",x:"Bigger vibrations = louder."},
  {t:"Larynx",n:"Voice breaking at puberty",f:"Males' larynx and vocal cords grow faster and longer; the young male can't yet control the longer cords.",x:"Longer cords also make a deeper (lower) voice and a bigger Adam's apple."},
  {t:"Trachea",n:"Trachea",f:"The windpipe: flexible tube connecting the larynx to the primary bronchi.",x:"Lies ventral to (in front of) the esophagus."},
- {t:"Trachea",n:"C-shaped cartilage rings",f:"Hold the trachea open.",x:"The open part of the C faces the esophagus so the esophagus can expand when you swallow."},
+ {t:"Trachea",n:"C-shaped cartilage rings",f:"Hold the trachea open.",x:"The open part of the C faces the esophagus so the esophagus can expand when you swallow. The rings are cartilage (hyaline, from the tissues unit)."},
  {t:"Trachea",n:"Trachea lining",f:"Pseudostratified ciliated columnar epithelium.",x:"Looks layered, but every cell touches the basement membrane."},
  {t:"Trachea",n:"Goblet cells",f:"Produce mucus that traps dust and debris.",x:"Found in the lining of the trachea."},
  {t:"Trachea",n:"Cilia in the trachea",f:"Beat upward, sweeping mucus and debris toward the pharynx to keep the lungs clean.",x:"The mucus is then swallowed or expectorated. Smoking destroys cilia, so soot collects in the lungs."},
@@ -475,7 +681,16 @@ const CARDS=[
  {t:"Lungs",n:"Diaphragm",f:"Dome-shaped muscle under the lungs separating the thoracic and abdominal cavities.",x:"Used in breathing."},
  {t:"Air prep",n:"How air is warmed",f:"By heat from blood vessels lying close to the surface of the airway lining.",x:""},
  {t:"Air prep",n:"How air is moistened",f:"By the wet surface of the passages.",x:"On the way out, air cools and its moisture condenses, so the nose may drip and breath makes a cloud on a cold day."},
- {t:"Air prep",n:"How air is cleansed",f:"Coarse hairs, cilia and mucus at the nostrils; cilia alone in the rest of the nasal cavity and airways.",x:"Hairs and cilia act as a screening device."}
+ {t:"Air prep",n:"How air is cleansed",f:"Coarse hairs, cilia and mucus at the nostrils; cilia alone in the rest of the nasal cavity and airways.",x:"Hairs and cilia act as a screening device. In the trachea, cilia sweep mucus, dust and stray food bits up to the pharynx to be swallowed or expectorated."},
+ {t:"Respiration",n:"Partner system",f:"The respiratory system works with the cardiovascular system to carry out respiration.",x:"Blood carries O₂ from the lungs to the tissues and brings CO₂ back."},
+ {t:"Respiration",n:"Path of air",f:"Nostrils → nasal cavities → pharynx → glottis → larynx → trachea → bronchi → bronchioles → alveoli.",x:"Practise it in the Path of air tab."},
+ {t:"Respiration",n:"Upper vs lower respiratory tract",f:"Upper: nasal cavities, pharynx, glottis, larynx. Lower: trachea, bronchi, bronchioles, lungs.",x:"The upper tract ends at the larynx; the lower tract starts at the trachea."},
+ {t:"Lungs",n:"Singular vs plural",f:"bronchus → bronchi; alveolus → alveoli.",x:"Tests often check the exact form."},
+ {t:"Nose",n:"Parts of the nasal septum",f:"Front: septal cartilage. Back: bone (ethmoid above, vomer below). Top front: nasal bone.",x:"For the test, the key fact is: the septum separates the two nasal cavities and is made of bone and cartilage."},
+ {t:"Pharynx",n:"Hard palate",f:"Front, bony part of the roof of the mouth, between the oral cavity and the nasal cavities.",x:"Behind it is the soft palate, which ends in the uvula."},
+ {t:"Pharynx",n:"Uvula",f:"Finger-shaped projection hanging from the back of the soft palate.",x:"Not the same as the tonsils."},
+ {t:"Lungs",n:"Capillary network",f:"Tiny blood vessels surrounding the alveoli, where gas exchange happens.",x:"Blood arrives O₂-poor (pulmonary arteriole) and leaves O₂-rich (pulmonary venule)."},
+ {t:"Pharynx",n:"Soft palate",f:"Back part of the roof of the mouth.",x:"The nasal cavities open into the nasopharynx above the soft palate."}
 ];
 const TOPICS=["All",...new Set(CARDS.map(c=>c.t))];
 let topic="All",reverse=false,mastered=new Set(store.get("airway-mastered",[])),deck=[],idx=0,flipped=false;
@@ -498,7 +713,7 @@ TOPICS.forEach(t=>{const b=document.createElement("button");b.className="chip";b
 buildDeck();
 
 /* ---------- PATH OF AIR ---------- */
-const PATH=[["Nostrils","up","Entry; coarse hairs screen air"],["Nasal cavities","up","Filter, warm and moisten air"],["Pharynx","up","Connection to surrounding regions"],["Glottis","up","Passage of air into the larynx"],["Larynx","up","Sound production"],["Trachea","low","Passage of air to the bronchi"],["Bronchi","low","Passage of air to the lungs"],["Bronchioles","low","Passage of air to each alveolus"],["Alveoli","low","Gas exchange"]];
+const PATH=[["Nostrils","up","Openings of the nose","Air enters; coarse hairs, cilia and mucus screen it"],["Nasal cavities","up","Hollow spaces in the nose","Filter, warm and moisten air"],["Pharynx","up","Chamber behind the oral cavity, between the nasal cavity and larynx","Connection to surrounding regions"],["Glottis","up","Opening into the larynx","Passage of air into the larynx"],["Larynx","up","Cartilaginous organ that contains the vocal cords; voice box","Sound production"],["Trachea","low","Flexible tube that connects the larynx with the bronchi; windpipe","Passage of air to the bronchi"],["Bronchi","low","Divisions of the trachea that enter the lungs","Passage of air to the lungs"],["Bronchioles","low","Branched tubes that lead from the bronchi to the alveoli","Passage of air to each alveolus"],["Alveoli","low","Tiny air sacs that make up the lungs (soft, cone-shaped organs filling much of the thoracic cavity)","Gas exchange"]];
 let step=0,misses=0;
 function pathStart(){step=0;misses=0;$("track").innerHTML='<span class="arrow">Start here →</span>';$("pool").innerHTML="";$("pathDone").hidden=true;
   shuffle(PATH).forEach(([n])=>{const b=document.createElement("button");b.className="chip";b.textContent=n;b.onclick=()=>pathTap(b,n);$("pool").append(b)});$("pathStat").textContent="0 of 9 placed";}
@@ -507,7 +722,7 @@ function pathTap(b,n){
     $("track").insertAdjacentHTML("beforeend",`<span>${n}</span>`);b.remove();step++;
     $("pathStat").textContent=`${step} of 9 placed · ${misses} wrong tap${misses===1?"":"s"}`;
     if(step===PATH.length){$("pathStat").textContent=misses?`Done with ${misses} wrong tap${misses===1?"":"s"}. Try again for a clean run.`:"Perfect run.";
-      $("pathTable").innerHTML=PATH.map(([n,r,f])=>`<tr><td><b>${n}</b></td><td><span class="region ${r}">${r==="up"?"Upper":"Lower"}</span></td><td>${f}</td></tr>`).join("");$("pathDone").hidden=false}}
+      $("pathTable").innerHTML=PATH.map(([n,r,d,f])=>`<tr><td><b>${n}</b></td><td><span class="region ${r}">${r==="up"?"Upper":"Lower"}</span></td><td>${d}</td><td>${f}</td></tr>`).join("");$("pathDone").hidden=false}}
   else{misses++;b.classList.remove("shake");void b.offsetWidth;b.classList.add("shake");$("pathStat").textContent=`${step} of 9 placed · ${misses} wrong tap${misses===1?"":"s"}`}
 }
 $("pathReset").onclick=pathStart;pathStart();
@@ -557,6 +772,17 @@ const KNOW=[
  {q:"How is air warmed as it moves through the airways?",o:["By blood vessels lying close to the surface of the lining","By the vocal cords vibrating","By cilia beating","By mucus from goblet cells"],e:"Heat from nearby blood vessels warms the air; the wet surface moistens it."},
  {q:"What is the Adam's apple?",o:["The apex of the larynx","The epiglottis","The top C-shaped ring of the trachea","A tonsil"],e:"The larynx is shaped like a triangular box; its tip at the front of the neck is the Adam's apple."},
  {q:"What kind of tissue are the tonsils?",o:["Lymphoid tissue","Cartilage","Smooth muscle","Simple squamous epithelium"],e:"They contain lymphocytes (B cells and T cells) that respond to inhaled antigens."},
+ {q:"What does inspiration mean?",o:["Breathing in (inhalation)","Breathing out (exhalation)","Gas exchange in the tissues","Making ATP in cells"],e:"Inspiration = inhalation. Expiration = exhalation."},
+ {q:"Which body system works with the respiratory system to carry out respiration?",o:["Cardiovascular system","Digestive system","Skeletal system","Urinary system"],e:"Blood carries O₂ from the lungs to the tissues and brings CO₂ back to the lungs."},
+ {q:"What cleans the air at the nostrils?",o:["Coarse hairs, cilia and mucus","Cilia alone","Tonsils","The vocal cords"],e:"In the rest of the nasal cavity and airways, cilia alone do the cleaning."},
+ {q:"How is air moistened as it moves in?",o:["By the wet surface of the passages","By the vocal cords","By the alveoli","By the C-shaped rings"],e:"Blood vessels near the surface warm the air; the wet surfaces moisten it."},
+ {q:"Where are the odor receptors?",o:["Ciliated cells in the narrow upper recesses of the nasal cavities","In the sinuses","In the larynx","In the oropharynx"],e:"Nerves carry their impulses to the brain, which interprets them as smell."},
+ {q:"What are the cranial sinuses?",o:["Air-filled, mucosa-lined spaces in the skull","Fluid-filled sacs in the lungs","Cartilage plates in the nose","Openings into the larynx"],e:"They connect with the nasal cavities. Blocked ducts cause a sinus headache."},
+ {q:"What happens to the larynx when you swallow?",o:["It moves upward against the epiglottis","It moves down into the trachea","It closes its C-shaped rings","It opens the esophagus"],e:"The epiglottis then covers the glottis. You can feel the larynx rise with a hand on your throat."},
+ {q:"Which cells in the tonsils prepare to respond to inhaled antigens?",o:["B cells and T cells","Goblet cells","Red blood cells","Odor receptors"],e:"Tonsils are lymphoid tissue, so the respiratory tract helps the immune system keep homeostasis."},
+ {q:"What is the plural of bronchus?",o:["Bronchi","Bronchus","Bronchioles","Bronchia"],e:"Bronchus → bronchi, alveolus → alveoli. Bronchioles are a different, smaller tube."},
+ {q:"Which description fits the lungs?",o:["Soft, cone-shaped organs filling much of the thoracic cavity","Hollow spaces in the nose","A cartilaginous box containing the vocal cords","A flexible tube held open by C-rings"],e:"From Table 15.1. Their function is gas exchange."},
+ {q:"What does the trachea connect?",o:["The larynx to the primary bronchi","The pharynx to the larynx","The bronchi to the alveoli","The nasal cavities to the pharynx"],e:"The trachea (windpipe) lies in front of the esophagus."},
  {q:"What controls the loudness of the voice?",o:["The amplitude of the vocal cord vibrations","The tension on the vocal cords","The width of the trachea","The length of the pharynx"],e:"Loudness = amplitude. Pitch = tension."}
 ];
 
@@ -641,21 +867,38 @@ const ANAT={
  bronchiole:["Bronchioles","Branched tubes leading from the bronchi to the alveoli.","Carry air to each alveolus."],
  lung:["Lungs","Soft, cone-shaped organs filling much of the thoracic cavity. Function: gas exchange.","Made of millions of alveoli."],
  alveoli:["Alveoli (singular: alveolus)","Tiny air sacs where gas exchange happens with the surrounding capillary network.","Pulmonary arteriole (blue) brings O₂-poor blood in; pulmonary venule (red) carries O₂-rich blood toward the heart."],
+ nasalbone:["Nasal bone","Forms the bony bridge of the nose, at the top front of the septum.","Below it, the nose is supported by cartilage, which is why the tip can bend."],
+ septcart:["Septal cartilage","The front part of the nasal septum, made of cartilage (hyaline cartilage).","Flexible: it is why you can wiggle the tip of your nose. Its cells sit in lacunae, like in your tissues unit."],
+ ethmoid:["Ethmoid bone (perpendicular plate)","The upper, back part of the nasal septum, made of bone.","Extra detail beyond the textbook, which only says the septum is bone and cartilage."],
+ vomer:["Vomer","The lower, back part of the nasal septum, made of bone.","Extra detail beyond the textbook. It sits on the hard palate."],
+ septum:["Nasal septum","Wall that separates the two nasal cavities.","Made of bone and cartilage. You can only see it from the front, as in the inset."],
+ odor:["Odor receptors","Special ciliated cells in the narrow upper recesses of the nasal cavities that detect smells.","Nerves carry their impulses to the brain, which interprets them as smell."],
+ lacrimal:["Tear (lacrimal) glands and tear ducts","Tear glands near the eye drain into the nasal cavities through tear ducts.","This is why crying gives you a runny nose."],
+ hardpalate:["Hard palate","Front, bony part of the roof of the mouth, between the oral cavity and the nasal cavities.","Behind it is the soft palate, which ends in the uvula."],
+ uvula:["Uvula","Finger-shaped projection hanging from the back of the soft palate.","Often confused with the tonsils, which sit on either side lower down."],
+ tongue:["Tongue","Muscular organ on the floor of the oral cavity.","Part of the digestive system; shown here as a landmark for the oral cavity."],
+ capillaries:["Capillary network","Tiny blood vessels surrounding the alveoli, where gas exchange happens.","CO₂ leaves the blood and O₂ enters it here (external respiration)."],
+ arteriole:["Pulmonary arteriole","Carries O₂-poor blood away from the heart to the alveoli.","Coloured blue. Arteries go away from the heart, even when the blood is O₂-poor."],
+ venule:["Pulmonary venule","Carries O₂-rich blood from the alveoli toward the heart.","Coloured red. Veins go toward the heart."],
+ softpalate:["Soft palate","Back part of the roof of the mouth.","The nasal cavities open into the nasopharynx above the soft palate."],
+ tonsils:["Tonsils","Protective ring of lymphoid tissue where the oral cavity meets the pharynx.","Their B cells and T cells respond to inhaled antigens, so the respiratory tract helps the immune system keep homeostasis."],
+ adam:["Adam's apple","The apex (tip) of the triangular larynx, at the front of the neck.","More prominent in males because the larynx grows more at puberty."],
  diaphragm:["Diaphragm","Dome-shaped muscle below the lungs that separates the thoracic and abdominal cavities.","Its movement drives breathing."]
 };
-const anat=$("anat");let hideMode=false;
+const anats=[...document.querySelectorAll(".anat")];let hideMode=false;
+const boxes=()=>document.querySelectorAll(".anatInfo");
 function showInfo(k){
-  anat.classList.add("focus");anat.querySelectorAll("[data-k]").forEach(e=>e.classList.toggle("on",e.dataset.k===k));
-  const [n,f,x]=ANAT[k];const box=$("anatInfo");
-  if(hideMode){box.innerHTML=`<span class="nm">Which structure is this?</span><p class="hint">Say its name and job out loud, then check.</p><div class="row"><button class="primary" id="revealBtn">Check answer</button></div>`;
-    $("revealBtn").onclick=()=>{box.innerHTML=infoHTML(n,f,x)};}
-  else box.innerHTML=infoHTML(n,f,x);
+  anats.forEach(s=>{s.classList.add("focus");s.querySelectorAll("[data-k]").forEach(e=>e.classList.toggle("on",e.dataset.k===k))});
+  const [n,f,x]=ANAT[k];
+  if(hideMode){boxes().forEach(b=>{b.innerHTML=`<span class="nm">Which structure is this?</span><p class="hint">Say its name and job out loud, then check.</p><div class="row"><button class="primary revealBtn">Check answer</button></div>`});
+    document.querySelectorAll(".revealBtn").forEach(btn=>btn.onclick=()=>boxes().forEach(b=>b.innerHTML=infoHTML(n,f,x)));}
+  else boxes().forEach(b=>b.innerHTML=infoHTML(n,f,x));
 }
 function infoHTML(n,f,x){return `<span class="nm">${n}</span><dl><dt>Function</dt><dd>${f}</dd><dt>Remember</dt><dd>${x}</dd></dl>`}
-function clearInfo(){anat.classList.remove("focus");anat.querySelectorAll(".on").forEach(e=>e.classList.remove("on"));$("anatInfo").innerHTML=`<span class="nm">Tap a structure</span><p class="hint">Start at the nostrils and follow the air down to the alveoli.</p>`}
-anat.querySelectorAll("[data-k]").forEach(e=>e.addEventListener("click",()=>showInfo(e.dataset.k)));
+function clearInfo(){anats.forEach(s=>{s.classList.remove("focus");s.querySelectorAll(".on").forEach(e=>e.classList.remove("on"))});boxes().forEach(b=>b.innerHTML=`<span class="nm">Tap a structure</span><p class="hint">Start at the nostrils and follow the air down to the alveoli.</p>`)}
+document.querySelectorAll(".anat [data-k]").forEach(e=>e.addEventListener("click",()=>showInfo(e.dataset.k)));
 $("hideBtn").onclick=e=>{hideMode=!hideMode;e.currentTarget.setAttribute("aria-pressed",hideMode);
-  anat.querySelectorAll(".lbl text").forEach(t=>t.textContent=hideMode?"?":t.dataset.name);clearInfo()};
+  document.querySelectorAll(".anat .lbl text[data-name]").forEach(t=>t.textContent=hideMode?"?":t.dataset.name);clearInfo()};
 $("clearBtn").onclick=clearInfo;clearInfo();
 
 /* ---------- HOW IT WORKS ---------- */
@@ -680,9 +923,87 @@ $("ringBtn").onclick=e=>{const es=$("esoph"),on=e.currentTarget.getAttribute("ar
   es.setAttribute("rx",on?44:26);es.setAttribute("cx",on?318:332);es.setAttribute("ry",on?40:32);
   $("ringCap").textContent=on?"Swallowing: the esophagus bulges forward into the open side of the C. A full ring would block it; this way the airway still stays open.":"At rest: the ring keeps the airway open so it can't collapse.";};
 
+/* ---------- AIR JOURNEY ---------- */
+(function(){
+const NS="http://www.w3.org/2000/svg",svg=$("jour"),pL=$("pL"),pR=$("pR"),L=pL.getTotalLength(),LR=pR.getTotalLength();
+const TI=12,TG=6,TB=5,TE=11,TOT=TI+TG+TB+TE;
+const near=(x,y)=>{let b=0,bd=1e9;for(let i=0;i<=400;i++){const p=pL.getPointAtLength(L*i/400);const d=(p.x-x)**2+(p.y-y)**2;if(d<bd){bd=d;b=i/400}}return b};
+const S=[
+ {ph:"in",a:[197,166],p:["nostril","nasal"],r:[1],t:"Nostrils",x:"Air enters through the nostrils. Coarse hairs, cilia and mucus act as a screen. Watch the dark dust specks get stuck here instead of going deeper."},
+ {ph:"in",a:[255,142],p:["nasal"],r:[1],t:"Nasal cavities",x:"Two cavities, separated by the septum. Cilia keep cleaning the air, blood vessels close to the surface warm it, and the wet lining moistens it. Odor receptors high up detect smells and send signals to the brain."},
+ {ph:"in",a:[305,162],p:["pharynx"],r:[1],t:"Nasopharynx",x:"The nasal cavities empty into the top part of the pharynx, above the soft palate. The auditory tubes to the middle ears open here."},
+ {ph:"in",a:[305,226],p:["pharynx","esophagus","epiglottis"],r:[1],t:"Oropharynx and laryngopharynx",x:"Air passes the opening of the mouth and the tonsils. Here the air path crosses the food path: the larynx is in front, the esophagus is behind and stays closed unless you swallow."},
+ {ph:"in",a:[288,262],p:["larynx","epiglottis"],r:[1],t:"Glottis and larynx",x:"The epiglottis stays up, so air goes through the glottis (the opening) into the larynx, passing between the vocal cords."},
+ {ph:"in",a:[286,330],p:["trachea"],r:[1],t:"Trachea",x:"C-shaped cartilage rings hold the windpipe open. Goblet cells make mucus and cilia sweep it upward toward the pharynx (the yellow dots), carrying away any dust that got this far."},
+ {ph:"in",a:[226,438],p:["bronchi","lung","diaphragm"],r:[1],t:"Bronchi",x:"The trachea divides into two bronchi, one into each lung. Meanwhile the diaphragm moves down and the lungs expand, which is what pulls the air in (more on this in the next section)."},
+ {ph:"in",a:[192,470],p:["bronchioles","lung"],r:[1],t:"Bronchioles",x:"The bronchi branch into smaller and smaller bronchioles, carrying air to each alveolus."},
+ {ph:"in",a:[170,515],p:["alveoli","lung"],r:[1],t:"Alveoli",x:"The air reaches millions of tiny air sacs. Each alveolus is wrapped in a capillary network. See the zoomed circle on the right."},
+ {ph:"gas",p:["alveoli"],r:[2],t:"Gas exchange (external respiration)",x:"O₂ diffuses from the air in the alveolus into the blood, and CO₂ diffuses from the blood into the alveolus. The walls are thin (simple squamous epithelium), so this is fast. Blood arrives O₂-poor in the pulmonary arteriole (blue) and leaves O₂-rich in the pulmonary venule (red). Notice the air dots in the lungs turning blue."},
+ {ph:"body",p:["alveoli"],r:[3,4],t:"Blood carries O₂ to the body",x:"O₂-rich blood goes to the heart, which pumps it to the body. In the tissues, O₂ moves into tissue fluid (internal respiration), and cells use it to make ATP (cellular respiration). The CO₂ they make rides the blood back to the lungs."},
+ {ph:"ex",a:[170,515],p:["alveoli","lung","diaphragm"],r:[1],t:"Exhale begins",x:"The diaphragm relaxes and moves up, and the lungs get smaller. CO₂-rich air (blue) is pushed out of the alveoli."},
+ {ph:"ex",a:[226,438],p:["bronchioles","bronchi"],r:[1],t:"Bronchioles and bronchi",x:"The air leaves the same way it came in, back through the bronchioles and bronchi."},
+ {ph:"ex",a:[286,330],p:["trachea"],r:[1],t:"Trachea",x:"The air moves up the trachea toward the larynx. The cilia keep sweeping mucus upward the whole time."},
+ {ph:"ex",a:[288,272],p:["larynx"],r:[1],t:"Larynx: making sound",x:"If you talk, the outgoing air makes the vocal cords vibrate. More tension and a narrower glottis give a higher pitch; bigger vibrations give a louder sound."},
+ {ph:"ex",a:[305,200],p:["pharynx"],r:[1],t:"Pharynx",x:"The air rises back through the pharynx toward the nose (or the mouth)."},
+ {ph:"ex",a:[255,142],p:["nasal","nostril"],r:[1],t:"Nasal cavities",x:"On the way out the air cools and loses moisture. The moisture condenses on the lining of the nose and windpipe, which is why your nose can drip, and why your breath makes a cloud on a cold day."},
+ {ph:"ex",a:[146,168],p:["nostril"],r:[1],t:"Out",x:"The breath leaves the body. Then the whole cycle starts again."}
+];
+S.forEach(s=>{if(s.a)s.f=near(s.a[0],s.a[1]);s.time=s.ph==="in"?s.f*TI:s.ph==="gas"?TI:s.ph==="body"?TI+TG:TI+TG+TB+(1-s.f)*TE;});
+S[0].time=0;
+const fN=S[0].f,fC=S[1].f;
+const parts=[],N=36;
+for(let i=0;i<N;i++){const c=document.createElementNS(NS,"circle");c.setAttribute("r",i<3?2.8:3.2);$("jParts").append(c);
+  parts.push({c,i,dust:i<3,d:i<3?0.01*i:0.02+Math.random()*0.17,br:i%2,jx:(Math.random()-.5)*7,jy:(Math.random()-.5)*6,stop:[fN+.005,fC-.02,fC+.03][i]})}
+const gas=[];const mk=(s,e,col,dl)=>{const c=document.createElementNS(NS,"circle");c.setAttribute("r",4.5);c.setAttribute("fill",col);c.setAttribute("stroke","var(--surface)");c.setAttribute("stroke-width","1.5");$("jGas").append(c);gas.push({c,s,e,dl})};
+mk([528,538],[518,598],"var(--o2)",0);mk([548,546],[556,582],"var(--o2)",.12);mk([560,526],[590,548],"var(--o2)",.24);mk([522,516],[500,592],"var(--o2)",.36);
+mk([504,594],[526,512],"var(--co2)",.05);mk([574,572],[552,530],"var(--co2)",.2);mk([602,516],[560,512],"var(--co2)",.35);
+const red=$("jRed"),capL=red.getTotalLength();red.style.strokeDasharray=capL;
+const dots=$("jDots");S.forEach((s,i)=>{const b=document.createElement("button");b.setAttribute("aria-label",`Stage ${i+1}: ${s.t}`);b.onclick=()=>{t=s.time+.01;draw()};dots.append(b)});
+let t=0,speed=1,cur=-1,last=performance.now(),play=!matchMedia("(prefers-reduced-motion: reduce)").matches;
+$("jPlay").textContent=play?"Pause":"Play";
+function lead(){if(t<TI)return["in",t/TI];if(t<TI+TG)return["gas",1];if(t<TI+TG+TB)return["body",1];return["ex",Math.max(0,1-(t-TI-TG-TB)/TE)]}
+function stage(i){cur=i;const s=S[i];
+  svg.classList.add("live");svg.querySelectorAll("[data-p]").forEach(e=>e.classList.toggle("hot",s.p.includes(e.dataset.p)));
+  const m=$("jMark");if(s.a){m.setAttribute("cx",s.a[0]);m.setAttribute("cy",s.a[1]);m.setAttribute("r",14)}else{m.setAttribute("cx",548);m.setAttribute("cy",540);m.setAttribute("r",74)}
+  const ph=$("jPhase");ph.className="phase "+(s.ph==="in"?"ph-in":s.ph==="ex"?"ph-ex":"ph-gas");ph.textContent=s.ph==="in"?"Inhale":s.ph==="ex"?"Exhale":s.ph==="gas"?"In the lungs":"In the body";
+  $("jCount").textContent=`Stage ${i+1} of ${S.length}`;$("jTitle").textContent=s.t;$("jText").textContent=s.x;
+  [...$("jResp").children].forEach((c,k)=>c.classList.toggle("on",s.r.includes(k+1)));
+  [...dots.children].forEach((b,k)=>{b.classList.toggle("on",k===i);b.classList.toggle("done",k<i)});
+  $("jVocal").classList.toggle("buzz",s.t==="Larynx: making sound");
+  $("jDrops").setAttribute("opacity",s.ph==="ex"&&s.f<fC+.04?1:0);
+  $("jBody").setAttribute("opacity",s.ph==="body"?1:0);
+}
+function draw(){
+  const [ph,u]=lead();
+  let idx=0;for(let i=0;i<S.length;i++)if(S[i].time<=t+1e-6)idx=i;if(idx!==cur)stage(idx);
+  const g=ph==="gas"?(t-TI)/TG:(ph==="in"?0:1);
+  parts.forEach(p=>{let v;
+    if(p.dust){if(ph!=="in"&&ph!=="gas"){p.c.style.opacity=0;return}v=Math.min(ph==="in"?u-p.d:1,p.stop)}
+    else if(ph==="in")v=u-p.d;else if(ph==="ex")v=u*1.2-.2+p.d;else v=1-p.d*.25;
+    if(v<0||v>1){p.c.style.opacity=0;return}
+    const path=p.br?pR:pL,q=path.getPointAtLength(v*(p.br?LR:L)),k=v<.04?.3:1;
+    p.c.setAttribute("cx",q.x+p.jx*k);p.c.setAttribute("cy",q.y+p.jy*k);p.c.style.opacity=1;
+    const blue=ph==="ex"||ph==="body"||(ph==="gas"&&p.i/N<g);
+    p.c.setAttribute("fill",p.dust?"var(--ink)":blue?"var(--co2)":"var(--o2)");});
+  const s=ph==="in"||ph==="ex"?u:1,kk=1+.07*s;
+  $("jLungs").setAttribute("transform",`translate(286 470) scale(${kk.toFixed(4)}) translate(-286 -470)`);
+  $("jDia").setAttribute("transform",`translate(0 ${(14*s).toFixed(2)})`);
+  $("jInset").style.opacity=ph==="gas"||ph==="body"?1:.6;
+  red.style.strokeDashoffset=capL*(1-g);
+  gas.forEach(o=>{const e=Math.min(1,Math.max(0,(g-o.dl)/.55));o.c.setAttribute("cx",o.s[0]+(o.e[0]-o.s[0])*e);o.c.setAttribute("cy",o.s[1]+(o.e[1]-o.s[1])*e)});
+}
+function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;if(!$("v-journey").hidden){if(play)t=(t+dt*speed)%TOT;draw()}requestAnimationFrame(loop)}
+$("jPlay").onclick=()=>{play=!play;$("jPlay").textContent=play?"Pause":"Play"};
+$("jRestart").onclick=()=>{t=0;cur=-1;draw()};
+$("jSpeed").onchange=e=>speed=+e.target.value;
+$("jNext").onclick=()=>{t=S[(cur+1)%S.length].time+.01;draw()};
+$("jPrev").onclick=()=>{t=S[(cur-1+S.length)%S.length].time+.01;draw()};
+draw();requestAnimationFrame(loop);
+})();
+
 /* ---------- ROUTING ---------- */
-const VIEWS=["anatomy","how","cards","path","knowledge","apply","mixups","cheat"];
-function route(){const v=VIEWS.includes(location.hash.slice(1))?location.hash.slice(1):"anatomy";
+const VIEWS=["journey","anatomy","how","cards","path","knowledge","apply","mixups","cheat"];
+function route(){const v=VIEWS.includes(location.hash.slice(1))?location.hash.slice(1):"journey";
   VIEWS.forEach(x=>{$("v-"+x).hidden=x!==v});
   document.querySelectorAll(".tabs a").forEach(a=>a.setAttribute("aria-current",a.getAttribute("href")==="#"+v?"page":"false"));}
 window.addEventListener("hashchange",route);route();
